@@ -73,6 +73,29 @@ func (service *EntriesService) List(spaceID string) *Collection {
 	return col
 }
 
+// Sync returns entries collection
+func (service *EntriesService) Sync(spaceID string, initial bool, syncToken ...string) *Collection {
+	path := fmt.Sprintf("/spaces/%s/sync", spaceID)
+	method := "GET"
+
+	req, err := service.c.newRequest(method, path, nil, nil)
+	if err != nil {
+		return &Collection{}
+	}
+
+	col := NewCollection(&CollectionOptions{})
+	if initial == true {
+		col.Query.Initial("true")
+	}
+	if len(syncToken) == 1 {
+		col.SyncToken = syncToken[0]
+	}
+	col.c = service.c
+	col.req = req
+
+	return col
+}
+
 // Get returns a single entry
 func (service *EntriesService) Get(spaceID, entryID string) (*Entry, error) {
 	path := fmt.Sprintf("/spaces/%s/entries/%s", spaceID, entryID)

@@ -33,6 +33,9 @@ type Query struct {
 	skip        uint16
 	mime        string
 	locale      string
+	syncType    string
+	initial     string
+	syncToken   string
 }
 
 //NewQuery initilazies a new query
@@ -61,6 +64,9 @@ func NewQuery() *Query {
 		skip:        0,
 		mime:        "",
 		locale:      "",
+		syncType:    "",
+		initial:     "",
+		syncToken:   "",
 	}
 }
 
@@ -213,15 +219,31 @@ func (q *Query) Locale(locale string) *Query {
 	return q
 }
 
+//SyncType query
+func (q *Query) SyncType(syncType string) *Query {
+	q.syncType = syncType
+	return q
+}
+
+//Initial query
+func (q *Query) Initial(initial string) *Query {
+	q.initial = initial
+	return q
+}
+
+//SyncToken query
+func (q *Query) SyncToken(syncToken string) *Query {
+	q.syncToken = syncToken
+	return q
+}
+
 // Values constructs url.Values
 func (q *Query) Values() url.Values {
 	params := url.Values{}
 
-	if q.include != 0 {
-		if q.include > 10 {
-			panic("include value should be between 0 and 10")
-		}
-
+	if q.include < 0 || q.include > 10 {
+		panic("include value should be between 0 and 10")
+	} else {
 		params.Set("include", strconv.Itoa(int(q.include)))
 	}
 
@@ -399,6 +421,25 @@ func (q *Query) Values() url.Values {
 
 	if q.locale != "" {
 		params.Set("locale", q.locale)
+	}
+
+	if q.syncType != "" {
+		params.Set("type", q.syncType)
+	}
+
+	if q.initial != "" {
+		if q.initial == "true" {
+			params.Set("initial", q.initial)
+		} else if q.initial == "false" {
+			params.Set("initial", q.initial)
+		} else {
+			panic("initial value can only be true or false")
+		}
+
+	}
+
+	if q.syncToken != "" {
+		params.Set("sync_token", q.syncToken)
 	}
 
 	return params

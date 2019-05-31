@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"regexp"
 )
 
 // CollectionOptions holds init options
@@ -11,24 +12,32 @@ type CollectionOptions struct {
 	Limit uint16
 }
 
+// Includes model
+type Includes struct {
+	Entry map[string]interface{} `json:"Entry"`
+	Asset map[string]interface{} `json:"Asset"`
+}
+
 // Collection model
 type Collection struct {
 	Query
-	c        *Contentful
-	req      *http.Request
-	page     uint16
-	Sys      *Sys          `json:"sys"`
-	Total    int           `json:"total"`
-	Skip     int           `json:"skip"`
-	Limit    int           `json:"limit"`
-	Items    []interface{} `json:"items"`
-	Includes interface{}   `json:"includes"`
+	c           *Contentful
+	req         *http.Request
+	page        uint16
+	Sys         *Sys                   `json:"sys"`
+	Total       int                    `json:"total"`
+	Skip        int                    `json:"skip"`
+	Limit       int                    `json:"limit"`
+	Items       []interface{}          `json:"items"`
+	Includes    map[string]interface{} `json:"includes"`
+	NextSyncURL string                 `json:"nextSyncUrl"`
+	NextPageURL string                 `json:"nextPageUrl"`
+	SyncToken   string
 }
 
 // NewCollection initilazies a new collection
 func NewCollection(options *CollectionOptions) *Collection {
 	query := NewQuery()
-	query.Order("sys.createdAt", true)
 
 	if options.Limit > 0 {
 		query.Limit(options.Limit)
@@ -43,8 +52,13 @@ func NewCollection(options *CollectionOptions) *Collection {
 // Next makes the col.req
 func (col *Collection) Next() (*Collection, error) {
 	// setup query params
-	skip := col.Query.limit * (col.page - 1)
-	col.Query.Skip(skip)
+	if col.SyncToken != "" {
+		col.Query = *NewQuery()
+		col.Query.SyncToken(col.SyncToken)
+	} else {
+		skip := col.Query.limit * (col.page - 1)
+		col.Query.Skip(skip)
+	}
 
 	// override request query
 	col.req.URL.RawQuery = col.Query.String()
@@ -56,7 +70,14 @@ func (col *Collection) Next() (*Collection, error) {
 	}
 
 	col.page++
-
+	r, _ := regexp.Compile("sync_token=([a-zA-Z0-9\\-\\_]+)")
+	if col.NextPageURL != "" {
+		syncToken := r.FindStringSubmatch(col.NextPageURL)
+		col.SyncToken = syncToken[1]
+	} else if col.NextSyncURL != "" {
+		syncToken := r.FindStringSubmatch(col.NextSyncURL)
+		col.SyncToken = syncToken[1]
+	}
 	return col, nil
 }
 
@@ -142,4 +163,49 @@ func (col *Collection) ToWebhook() []*Webhook {
 	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&webhooks)
 
 	return webhooks
+}
+
+// ToIncludesEntry cast includesEntry to Entry model
+func (col *Collection) ToIncludesEntry() []*Entry {
+	var includesEntry []*Entry
+
+	byteArray, _ := json.Marshal(col.Includes["Entry"])
+	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesEntry)
+	return includesEntry
+}
+
+// ToIncludesEntryMap returns a map of Entry's from the Includes
+func (col *Collection) ToIncludesEntryMap() map[string]*Entry {
+	var includesEntry []*Entry
+	includesEntryMap := make(map[string]*Entry)
+
+	byteArray, _ := json.Marshal(col.Includes["Entry"])
+	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesEntry)
+	for _, e := range includesEntry {
+		includesEntryMap[e.Sys.ID] = e
+	}
+	return includesEntryMap
+}
+
+// ToIncludesAsset cast includesAsset to Asset model
+func (col *Collection) ToIncludesAsset() []*IncludeAsset {
+	var includesAsset []*IncludeAsset
+
+	byteArray, _ := json.Marshal(col.Includes["Asset"])
+	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset)
+	return includesAsset
+}
+
+// ToIncludesAssetMap returns a map of Asset's from the Includes
+func (col *Collection) ToIncludesAssetMap() map[string]*IncludeAsset {
+	var includesAsset []*IncludeAsset
+	includesAssetMap := make(map[string]*IncludeAsset)
+
+	byteArray, _ := json.Marshal(col.Includes["Asset"])
+	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset)
+
+	for _, a := range includesAsset {
+		includesAssetMap[a.Sys.ID] = a
+	}
+	return includesAssetMap
 }
