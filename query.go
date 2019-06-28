@@ -36,6 +36,7 @@ type Query struct {
 	syncType    string
 	initial     string
 	syncToken   string
+	sysID       string
 }
 
 //NewQuery initilazies a new query
@@ -67,7 +68,14 @@ func NewQuery() *Query {
 		syncType:    "",
 		initial:     "",
 		syncToken:   "",
+		sysID:       "",
 	}
+}
+
+//SysID query
+func (q *Query) SysID(sid string) *Query {
+	q.sysID = sid
+	return q
 }
 
 //Include query
@@ -440,6 +448,10 @@ func (q *Query) Values() url.Values {
 
 	if q.syncToken != "" {
 		params.Set("sync_token", q.syncToken)
+	}
+
+	if q.sysID != "" {
+		params.Set("sys.id", q.sysID)
 	}
 
 	return params
