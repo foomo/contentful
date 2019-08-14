@@ -106,9 +106,7 @@ func (service *AssetsService) Get(spaceID, assetID string, locale ...string) (*A
 			return nil, err
 		}
 		retLocale := assetNoLocale.Sys.Locale
-		fmt.Println("LOCALE IS: ", retLocale)
 		asset.Sys = assetNoLocale.Sys
-		// asset.Fields.Title[retLocale] = assetNoLocale.Fields.Title
 		localizedTitle := map[string]string{
 			retLocale: assetNoLocale.Fields.Title,
 		}
@@ -130,6 +128,24 @@ func (service *AssetsService) Get(spaceID, assetID string, locale ...string) (*A
 	}
 	return &asset, nil
 
+}
+
+// GetLocalized returns the asset with fields without localization map
+func (asset *Asset) GetLocalized() (assetNoLocale *AssetNoLocale) {
+	// No default locale available if asking for all locales, fallback to nil
+	if asset.Sys.Locale == "" {
+		return nil
+	}
+
+	assetNoLocale = &AssetNoLocale{
+		Sys: asset.Sys,
+		Fields: &FileFieldsNoLocale{
+			Title:       asset.Fields.Title[asset.Sys.Locale],
+			Description: asset.Fields.Description[asset.Sys.Locale],
+			File:        asset.Fields.File[asset.Sys.Locale],
+		},
+	}
+	return
 }
 
 // Upsert updates or creates a new asset entity
