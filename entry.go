@@ -97,9 +97,12 @@ func (service *EntriesService) Sync(spaceID string, initial bool, syncToken ...s
 }
 
 // Get returns a single entry
-func (service *EntriesService) Get(spaceID, entryID string) (*Entry, error) {
+func (service *EntriesService) Get(spaceID, entryID string, locale ...string) (*Entry, error) {
 	path := fmt.Sprintf("/spaces/%s/entries/%s", spaceID, entryID)
 	query := url.Values{}
+	if len(locale) > 0 {
+		query["locale"] = locale
+	}
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, query, nil)
