@@ -120,6 +120,20 @@ func (c *Contentful) SetOrganization(organizationID string) *Contentful {
 	return c
 }
 
+// SetHTTPClient sets the underlying http.Client used to make requests.
+func (c *Contentful) SetHTTPClient(client *http.Client) *Contentful {
+	c.client = client
+	return c
+}
+
+// SetHTTPTransport creates a new http.Client and sets a custom Roundtripper.
+func (c *Contentful) SetHTTPTransport(t http.RoundTripper) *Contentful {
+	c.client = &http.Client{
+		Transport: t,
+	}
+	return c
+}
+
 func (c *Contentful) newRequest(method, path string, query url.Values, body io.Reader) (*http.Request, error) {
 	u, err := url.Parse(c.BaseURL)
 	if err != nil {
