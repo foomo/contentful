@@ -249,9 +249,10 @@ func (q *Query) SyncToken(syncToken string) *Query {
 func (q *Query) Values() url.Values {
 	params := url.Values{}
 
-	if q.include < 0 || q.include > 10 {
-		panic("include value should be between 0 and 10")
-	} else {
+	if q.include != 0 {
+		if q.include < 0 || q.include > 10 {
+			panic("include value should be between 0 and 10")
+		}
 		params.Set("include", strconv.Itoa(int(q.include)))
 	}
 
