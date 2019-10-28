@@ -95,6 +95,25 @@ func (col *Collection) Get() (*Collection, error) {
 	return col, nil
 }
 
+// GetAll paginates and returns all items - beware of memory usage!
+func (col *Collection) GetAll() (*Collection, error) {
+	var errNext error
+	var allItems []interface{}
+	col.Query.Limit(1000)
+	for errNext == nil {
+		col, errNext = col.Next()
+		if errNext != nil {
+			return nil, errNext
+		}
+		if len(col.Items) == 0 {
+			break
+		}
+		allItems = append(allItems, col.Items...)
+	}
+	col.Items = allItems
+	return col, nil
+}
+
 // ToContentType cast Items to ContentType model
 func (col *Collection) ToContentType() []*ContentType {
 	var contentTypes []*ContentType
