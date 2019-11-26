@@ -23,7 +23,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/moul/http2curl"
+  name = "moul.io/http2curl"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
