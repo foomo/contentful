@@ -105,10 +105,11 @@ func (col *Collection) GetAll() (*Collection, error) {
 		if errNext != nil {
 			return nil, errNext
 		}
-		if len(col.Items) == 0 {
+		allItems = append(allItems, col.Items...)
+		if len(col.Items) < 1000 {
 			break
 		}
-		allItems = append(allItems, col.Items...)
+
 	}
 	col.Items = allItems
 	return col, nil
