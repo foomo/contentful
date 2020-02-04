@@ -1,0 +1,88 @@
+{
+  "sys": {
+    "type": "Array"
+  },
+  "total": 1,
+  "skip": 0,
+  "limit": 100,
+  "items": [
+    {
+      "sys": {
+        "space": {
+          "sys": {
+            "type": "Link",
+            "linkType": "Space",
+            "id": "cfexampleapi"
+          }
+        },
+        "id": "74kncJ0iKDnPwdwxECSflC",
+        "type": "Entry",
+        "createdAt": "2019-10-01T13:34:51.503Z",
+        "updatedAt": "2019-10-01T16:52:37.034Z",
+        "environment": {
+          "sys": {
+            "id": "master",
+            "type": "Link",
+            "linkType": "Environment"
+          }
+        },
+        "revision": 3,
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "66980e55e52d1d051c1e5ed59c4bc3ca"
+          }
+        },
+        "locale": "de"
+      },
+      "fields": {
+        "title": "Mein erstes Test Paket",
+        "description": "Lorem ipsum DE",
+        "durationMinutes": 180,
+        "price": 299,
+        "media": {
+          "sys": {
+            "type": "Link",
+            "linkType": "Asset",
+            "id": "6J9XyyIv14p159rJvZjogb"
+          }
+        },
+        "sku": "12345678",
+        "features": {
+          "set": [
+            {
+              "featureDe": "Farb- und Stilberatung",
+              "featureFr": "French feature one"
+            },
+            {
+              "featureDe": "Gemeinsame Erarbeitung Ihres  individuellen Kollektions-Portfolios",
+              "featureFr": "French feature two"
+            },
+            {
+              "featureDe": "Einführung in aktuelle Trends",
+              "featureFr": "French feature three"
+            },
+            {
+              "featureDe": "Private Atmosphäre inkl. Apéro",
+              "featureFr": "French feature four"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "errors": [
+    {
+      "sys": {
+        "id": "notResolvable",
+        "type": "error"
+      },
+      "details": {
+        "type": "Link",
+        "linkType": "Asset",
+        "id": "6J9XxxIv14p559rJwZjPgb"
+      }
+    }
+  ]
+}

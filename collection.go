@@ -33,9 +33,15 @@ type Collection struct {
 	NextSyncURL string                 `json:"nextSyncUrl"`
 	NextPageURL string                 `json:"nextPageUrl"`
 	SyncToken   string
+	// Errors which occur in the contentful structure. They are not checked in
+	// this source code. Please do it yourself as you might still want to parse
+	// the result despite the error.
+	Errors []Error `json:"errors"`
+	// Details might also get set in case of errors.
+	Details *ErrorDetails
 }
 
-// NewCollection initilazies a new collection
+// NewCollection initializes a new collection
 func NewCollection(options *CollectionOptions) *Collection {
 	query := NewQuery()
 
@@ -83,7 +89,6 @@ func (col *Collection) Next() (*Collection, error) {
 
 // Get makes the col.req with no automatic pagination
 func (col *Collection) Get() (*Collection, error) {
-
 	// override request query
 	col.req.URL.RawQuery = col.Query.String()
 	// makes api call
@@ -97,10 +102,10 @@ func (col *Collection) Get() (*Collection, error) {
 
 // GetAll paginates and returns all items - beware of memory usage!
 func (col *Collection) GetAll() (*Collection, error) {
-	var errNext error
 	var allItems []interface{}
 	col.Query.Limit(1000)
-	for errNext == nil {
+	for {
+		var errNext error
 		col, errNext = col.Next()
 		if errNext != nil {
 			return nil, errNext

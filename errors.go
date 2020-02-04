@@ -18,6 +18,15 @@ func (e ErrorResponse) Error() string {
 	return e.Message
 }
 
+// Error defines an internal contentful data model error when e.g. an assets can
+// be resolved. The structure gets returned while this error is set too. The
+// programmer can decide how to handle the response by checking the
+// Collection.Errors field.
+type Error struct {
+	Sys     *Sys
+	Details map[string]string
+}
+
 // ErrorDetails model
 type ErrorDetails struct {
 	Errors []*ErrorDetail `json:"errors,omitempty"`
