@@ -18,16 +18,3 @@ type IncludeAsset struct {
 	Fields *IncludeFileFields `json:"fields"`
 	Sys    *Sys               `json:"sys"`
 }
-
-// IncludeFileLocalizedFields model
-type IncludeFileLocalizedFields struct {
-	Title       map[string]string `json:"title,omitempty"`
-	Description map[string]string `json:"description,omitempty"`
-	File        map[string]*File  `json:"file,omitempty"`
-}
-
-// IncludeLocalizedAsset model
-type IncludeLocalizedAsset struct {
-	Fields *IncludeFileLocalizedFields `json:"fields"`
-	Sys    *Sys                        `json:"sys"`
-}

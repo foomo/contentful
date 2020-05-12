@@ -236,9 +236,9 @@ func (col *Collection) ToIncludesAssetMap() map[string]*IncludeAsset {
 }
 
 // ToIncludesLocalizedAssetMap returns a map of Asset's from the Includes
-func (col *Collection) ToIncludesLocalizedAssetMap() map[string]*IncludeLocalizedAsset {
-	var includesAsset []*IncludeLocalizedAsset
-	includesAssetMap := make(map[string]*IncludeLocalizedAsset)
+func (col *Collection) ToIncludesLocalizedAssetMap() map[string]*Asset {
+	var includesAsset []*Asset
+	includesAssetMap := make(map[string]*Asset)
 
 	byteArray, _ := json.Marshal(col.Includes["Asset"])
 	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset)
