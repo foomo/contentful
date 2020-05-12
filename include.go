@@ -1,11 +1,5 @@
 package contentful
 
-/* // Include model
-type Include struct {
-	Entry []*Entry
-	Asset []*Asset
-} */
-
 //IncludeEntry model
 type IncludeEntry struct {
 	Fields map[string]interface{} `json:"fields,omitempty"`
@@ -23,4 +17,17 @@ type IncludeFileFields struct {
 type IncludeAsset struct {
 	Fields *IncludeFileFields `json:"fields"`
 	Sys    *Sys               `json:"sys"`
+}
+
+// IncludeFileLocalizedFields model
+type IncludeFileLocalizedFields struct {
+	Title       map[string]string `json:"title,omitempty"`
+	Description map[string]string `json:"description,omitempty"`
+	File        map[string]*File  `json:"file,omitempty"`
+}
+
+// IncludeLocalizedAsset model
+type IncludeLocalizedAsset struct {
+	Fields *IncludeFileLocalizedFields `json:"fields"`
+	Sys    *Sys                        `json:"sys"`
 }
