@@ -27,7 +27,7 @@ type Collection struct {
 	Sys         *Sys                   `json:"sys"`
 	Total       int                    `json:"total"`
 	Skip        int                    `json:"skip"`
-	Limit       int                    `json:"limit"`
+	Limit       uint16                 `json:"limit"`
 	Items       []interface{}          `json:"items"`
 	Includes    map[string]interface{} `json:"includes"`
 	NextSyncURL string                 `json:"nextSyncUrl"`
@@ -44,14 +44,16 @@ type Collection struct {
 // NewCollection initializes a new collection
 func NewCollection(options *CollectionOptions) *Collection {
 	query := NewQuery()
-
+	limit := uint16(100)
 	if options.Limit > 0 {
-		query.Limit(options.Limit)
+		limit = options.Limit
 	}
+	query.Limit(limit)
 
 	return &Collection{
 		Query: *query,
 		page:  1,
+		Limit: limit,
 	}
 }
 
@@ -103,7 +105,7 @@ func (col *Collection) Get() (*Collection, error) {
 // GetAll paginates and returns all items - beware of memory usage!
 func (col *Collection) GetAll() (*Collection, error) {
 	var allItems []interface{}
-	col.Query.Limit(1000)
+	col.Query.Limit(col.Limit)
 	for {
 		var errNext error
 		col, errNext = col.Next()
@@ -111,10 +113,9 @@ func (col *Collection) GetAll() (*Collection, error) {
 			return nil, errNext
 		}
 		allItems = append(allItems, col.Items...)
-		if len(col.Items) < 1000 {
+		if uint16(len(col.Items)) < col.Limit {
 			break
 		}
-
 	}
 	col.Items = allItems
 	return col, nil
