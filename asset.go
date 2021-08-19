@@ -70,7 +70,7 @@ func (asset *Asset) GetVersion() int {
 
 // List returns asset collection
 func (service *AssetsService) List(spaceID string) *Collection {
-	path := fmt.Sprintf("/spaces/%s/assets", spaceID)
+	path := fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -87,7 +87,7 @@ func (service *AssetsService) List(spaceID string) *Collection {
 
 // Get returns a single asset entity
 func (service *AssetsService) Get(spaceID, assetID string, locale ...string) (*Asset, error) {
-	path := fmt.Sprintf("/spaces/%s/assets/%s", spaceID, assetID)
+	path := fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), assetID)
 	query := url.Values{}
 	if service.c.api == "CDA" && len(locale) > 0 {
 		query["locale"] = locale
@@ -159,10 +159,10 @@ func (service *AssetsService) Upsert(spaceID string, asset *Asset) error {
 	var method string
 
 	if asset.Sys.ID != "" {
-		path = fmt.Sprintf("/spaces/%s/assets/%s", spaceID, asset.Sys.ID)
+		path = fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), asset.Sys.ID)
 		method = "PUT"
 	} else {
-		path = fmt.Sprintf("/spaces/%s/assets", spaceID)
+		path = fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
 		method = "POST"
 	}
 
@@ -178,7 +178,7 @@ func (service *AssetsService) Upsert(spaceID string, asset *Asset) error {
 
 // Delete sends delete request
 func (service *AssetsService) Delete(spaceID string, asset *Asset) error {
-	path := fmt.Sprintf("/spaces/%s/assets/%s", spaceID, asset.Sys.ID)
+	path := fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), asset.Sys.ID)
 	method := "DELETE"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -200,7 +200,7 @@ func (service *AssetsService) Process(spaceID string, asset *Asset) error {
 		break
 	}
 
-	path := fmt.Sprintf("/spaces/%s/assets/%s/files/%s/process", spaceID, asset.Sys.ID, locale)
+	path := fmt.Sprintf("/spaces/%s%s/assets/%s/files/%s/process", spaceID, getEnvPath(service.c), asset.Sys.ID, locale)
 	method := "PUT"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -216,7 +216,7 @@ func (service *AssetsService) Process(spaceID string, asset *Asset) error {
 
 // Publish publishes the asset
 func (service *AssetsService) Publish(spaceID string, asset *Asset) error {
-	path := fmt.Sprintf("/spaces/%s/assets/%s/published", spaceID, asset.Sys.ID)
+	path := fmt.Sprintf("/spaces/%s%s/assets/%s/published", spaceID, getEnvPath(service.c), asset.Sys.ID)
 	method := "PUT"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -232,7 +232,7 @@ func (service *AssetsService) Publish(spaceID string, asset *Asset) error {
 
 // Unpublish unpublishes the asset
 func (service *AssetsService) Unpublish(spaceID string, asset *Asset) error {
-	path := fmt.Sprintf("/spaces/%s/assets/%s/published", spaceID, asset.Sys.ID)
+	path := fmt.Sprintf("/spaces/%s%s/assets/%s/published", spaceID, getEnvPath(service.c), asset.Sys.ID)
 	method := "DELETE"
 
 	req, err := service.c.newRequest(method, path, nil, nil)

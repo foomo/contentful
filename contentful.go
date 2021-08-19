@@ -23,6 +23,7 @@ type Contentful struct {
 	QueryParams map[string]string
 	Headers     map[string]string
 	BaseURL     string
+	Environment string
 
 	Spaces       *SpacesService
 	APIKeys      *APIKeyService
@@ -35,6 +36,14 @@ type Contentful struct {
 
 type service struct {
 	c *Contentful
+}
+
+func getEnvPath(c *Contentful) (envPath string) {
+	if c.Environment != "" {
+		envPath = fmt.Sprintf("/environments/%s", c.Environment)
+		return
+	}
+	return
 }
 
 // NewCMA returns a CMA client

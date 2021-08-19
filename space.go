@@ -78,7 +78,7 @@ func (service *SpacesService) Upsert(space *Space) error {
 	var method string
 
 	if space.Sys != nil && space.Sys.CreatedAt != "" {
-		path = fmt.Sprintf("/spaces/%s", space.Sys.ID)
+		path = fmt.Sprintf("/spaces/%s%s", space.Sys.ID, getEnvPath(service.c))
 		method = "PUT"
 	} else {
 		path = "/spaces"

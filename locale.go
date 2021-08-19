@@ -48,7 +48,7 @@ func (locale *Locale) GetVersion() int {
 
 // List returns a locales collection
 func (service *LocalesService) List(spaceID string) *Collection {
-	path := fmt.Sprintf("/spaces/%s/locales", spaceID)
+	path := fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -65,7 +65,7 @@ func (service *LocalesService) List(spaceID string) *Collection {
 
 // Get returns a single locale entity
 func (service *LocalesService) Get(spaceID, localeID string) (*Locale, error) {
-	path := fmt.Sprintf("/spaces/%s/locales/%s", spaceID, localeID)
+	path := fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), localeID)
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -83,7 +83,7 @@ func (service *LocalesService) Get(spaceID, localeID string) (*Locale, error) {
 
 // Delete the locale
 func (service *LocalesService) Delete(spaceID string, locale *Locale) error {
-	path := fmt.Sprintf("/spaces/%s/locales/%s", spaceID, locale.Sys.ID)
+	path := fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), locale.Sys.ID)
 	method := "DELETE"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -108,10 +108,10 @@ func (service *LocalesService) Upsert(spaceID string, locale *Locale) error {
 	var method string
 
 	if locale.Sys != nil && locale.Sys.CreatedAt != "" {
-		path = fmt.Sprintf("/spaces/%s/locales/%s", spaceID, locale.Sys.ID)
+		path = fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), locale.Sys.ID)
 		method = "PUT"
 	} else {
-		path = fmt.Sprintf("/spaces/%s/locales", spaceID)
+		path = fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
 		method = "POST"
 	}
 

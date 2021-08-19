@@ -39,7 +39,7 @@ func (webhook *Webhook) GetVersion() int {
 
 // List returns webhooks collection
 func (service *WebhooksService) List(spaceID string) *Collection {
-	path := fmt.Sprintf("/spaces/%s/webhook_definitions", spaceID)
+	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions", spaceID, getEnvPath(service.c))
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -56,7 +56,7 @@ func (service *WebhooksService) List(spaceID string) *Collection {
 
 // Get returns a single webhook entity
 func (service *WebhooksService) Get(spaceID, webhookID string) (*Webhook, error) {
-	path := fmt.Sprintf("/spaces/%s/webhook_definitions/%s", spaceID, webhookID)
+	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions/%s", spaceID, getEnvPath(service.c), webhookID)
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -83,10 +83,10 @@ func (service *WebhooksService) Upsert(spaceID string, webhook *Webhook) error {
 	var method string
 
 	if webhook.Sys != nil && webhook.Sys.CreatedAt != "" {
-		path = fmt.Sprintf("/spaces/%s/webhook_definitions/%s", spaceID, webhook.Sys.ID)
+		path = fmt.Sprintf("/spaces/%s%s/webhook_definitions/%s", spaceID, getEnvPath(service.c), webhook.Sys.ID)
 		method = "PUT"
 	} else {
-		path = fmt.Sprintf("/spaces/%s/webhook_definitions", spaceID)
+		path = fmt.Sprintf("/spaces/%s%s/webhook_definitions", spaceID, getEnvPath(service.c))
 		method = "POST"
 	}
 
@@ -102,7 +102,7 @@ func (service *WebhooksService) Upsert(spaceID string, webhook *Webhook) error {
 
 // Delete the webhook
 func (service *WebhooksService) Delete(spaceID string, webhook *Webhook) error {
-	path := fmt.Sprintf("/spaces/%s/webhook_definitions/%s", spaceID, webhook.Sys.ID)
+	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions/%s", spaceID, getEnvPath(service.c), webhook.Sys.ID)
 	method := "DELETE"
 
 	req, err := service.c.newRequest(method, path, nil, nil)

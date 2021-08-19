@@ -54,7 +54,7 @@ func (apiKey *APIKey) GetVersion() int {
 
 // List returns all api keys collection
 func (service *APIKeyService) List(spaceID string) *Collection {
-	path := fmt.Sprintf("/spaces/%s/api_keys", spaceID)
+	path := fmt.Sprintf("/spaces/%s%s/api_keys", spaceID, getEnvPath(service.c))
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -71,7 +71,7 @@ func (service *APIKeyService) List(spaceID string) *Collection {
 
 // Get returns a single api key entity
 func (service *APIKeyService) Get(spaceID, apiKeyID string) (*APIKey, error) {
-	path := fmt.Sprintf("/spaces/%s/api_keys/%s", spaceID, apiKeyID)
+	path := fmt.Sprintf("/spaces/%s%s/api_keys/%s", spaceID, getEnvPath(service.c), apiKeyID)
 	method := "GET"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
@@ -98,10 +98,10 @@ func (service *APIKeyService) Upsert(spaceID string, apiKey *APIKey) error {
 	var method string
 
 	if apiKey.Sys != nil && apiKey.Sys.CreatedAt != "" {
-		path = fmt.Sprintf("/spaces/%s/api_keys/%s", spaceID, apiKey.Sys.ID)
+		path = fmt.Sprintf("/spaces/%s%s/api_keys/%s", spaceID, getEnvPath(service.c), apiKey.Sys.ID)
 		method = "PUT"
 	} else {
-		path = fmt.Sprintf("/spaces/%s/api_keys", spaceID)
+		path = fmt.Sprintf("/spaces/%s%s/api_keys", spaceID, getEnvPath(service.c))
 		method = "POST"
 	}
 
@@ -117,7 +117,7 @@ func (service *APIKeyService) Upsert(spaceID string, apiKey *APIKey) error {
 
 // Delete deletes a sinlge api key entity
 func (service *APIKeyService) Delete(spaceID string, apiKey *APIKey) error {
-	path := fmt.Sprintf("/spaces/%s/api_keys/%s", spaceID, apiKey.Sys.ID)
+	path := fmt.Sprintf("/spaces/%s%s/api_keys/%s", spaceID, getEnvPath(service.c), apiKey.Sys.ID)
 	method := "DELETE"
 
 	req, err := service.c.newRequest(method, path, nil, nil)
