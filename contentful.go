@@ -143,6 +143,12 @@ func (c *Contentful) SetHTTPTransport(t http.RoundTripper) *Contentful {
 	return c
 }
 
+// SetBaseURL provides an option to change the BaseURL of the client
+func (c *Contentful) SetBaseURL(url string) *Contentful {
+	c.BaseURL = url
+	return c
+}
+
 func (c *Contentful) newRequest(method, path string, query url.Values, body io.Reader) (*http.Request, error) {
 	u, err := url.Parse(c.BaseURL)
 	if err != nil {
