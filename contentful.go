@@ -160,7 +160,7 @@ func (c *Contentful) newRequest(method, path string, query url.Values, body io.R
 		query.Set(key, value)
 	}
 
-	u.Path = path
+	u.Path = u.Path + path
 	u.RawQuery = query.Encode()
 
 	req, err := http.NewRequest(method, u.String(), body)
