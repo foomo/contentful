@@ -249,7 +249,7 @@ func (c *Contentful) handleError(req *http.Request, res *http.Response) error {
 		return RateLimitExceededError{apiError}
 	case "AccessTokenInvalid":
 		return AccessTokenInvalidError{apiError}
-	case "ValidationFailed":
+	case "ValidationFailed", "UnresolvedLinks":
 		return ValidationFailedError{apiError}
 	case "VersionMismatch":
 		return VersionMismatchError{apiError}

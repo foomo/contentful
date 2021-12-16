@@ -75,10 +75,27 @@ func (e ValidationFailedError) Error() string {
 	msg := bytes.Buffer{}
 
 	for _, err := range e.APIError.err.Details.Errors {
-		if err.Name == "uniqueFieldIds" || err.Name == "uniqueFieldApiNames" {
+		switch err.Name {
+		case "uniqueFieldIds", "uniqueFieldApiNames":
 			return msg.String()
+		case "notResolvable":
+			if err.Path != nil {
+				switch err.Path.(type) {
+				case []interface{}:
+					path := err.Path.([]interface{})
+					pathString := ""
+					for _, segment := range path {
+						switch segment.(type) {
+						case string:
+							pathString += fmt.Sprintf("/%s", segment.(string))
+						}
+					}
+					msg.WriteString(fmt.Sprintf("errorName: %s, path: %s", err.Name, pathString))
+				}
+			}
+		default:
+			msg.WriteString(fmt.Sprintf("%s\n", err.Details))
 		}
-		msg.WriteString(fmt.Sprintf("%s\n", err.Details))
 	}
 
 	return msg.String()
