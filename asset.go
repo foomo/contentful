@@ -197,21 +197,25 @@ func (service *AssetsService) Process(spaceID string, asset *Asset) error {
 	var locale string
 	for k := range asset.Fields.Title {
 		locale = k
-		break
+		if asset.Fields.File[k].UploadURL == "" {
+			continue
+		}
+		path := fmt.Sprintf("/spaces/%s%s/assets/%s/files/%s/process", spaceID, getEnvPath(service.c), asset.Sys.ID, locale)
+		method := "PUT"
+
+		req, err := service.c.newRequest(method, path, nil, nil)
+		if err != nil {
+			return err
+		}
+
+		version := strconv.Itoa(asset.Sys.Version)
+		req.Header.Set("X-Contentful-Version", version)
+		err = service.c.do(req, nil)
+		if err != nil {
+			return err
+		}
 	}
-
-	path := fmt.Sprintf("/spaces/%s%s/assets/%s/files/%s/process", spaceID, getEnvPath(service.c), asset.Sys.ID, locale)
-	method := "PUT"
-
-	req, err := service.c.newRequest(method, path, nil, nil)
-	if err != nil {
-		return err
-	}
-
-	version := strconv.Itoa(asset.Sys.Version)
-	req.Header.Set("X-Contentful-Version", version)
-
-	return service.c.do(req, nil)
+	return nil
 }
 
 // Publish publishes the asset
