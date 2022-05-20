@@ -255,7 +255,9 @@ func (q *Query) Values() url.Values {
 		}
 		params.Set("include", strconv.Itoa(int(q.include)))
 	}
-
+	if q.include == 0 {
+		params.Set("include", "0")
+	}
 	if q.contentType != "" {
 		params.Set("content_type", q.contentType)
 	}
