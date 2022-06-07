@@ -1,4 +1,4 @@
-module contentful
+module github.com/foomo/contentful
 
 go 1.16
 
