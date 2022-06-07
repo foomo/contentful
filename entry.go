@@ -200,3 +200,19 @@ func (service *EntriesService) Unpublish(spaceID string, entry *Entry) error {
 
 	return service.c.do(req, nil)
 }
+
+// Publish the entry
+func (service *EntriesService) Archive(spaceID string, entry *Entry) error {
+	path := fmt.Sprintf("/spaces/%s%s/entries/%s/archived", spaceID, getEnvPath(service.c), entry.Sys.ID)
+	method := "PUT"
+
+	req, err := service.c.newRequest(method, path, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	version := strconv.Itoa(entry.Sys.Version)
+	req.Header.Set("X-Contentful-Version", version)
+
+	return service.c.do(req, nil)
+}
