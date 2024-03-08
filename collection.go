@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 )
@@ -17,10 +16,6 @@ type CollectionOptions struct {
 type Includes struct {
 	Entry map[string]interface{} `json:"Entry"`
 	Asset map[string]interface{} `json:"Asset"`
-}
-
-type Pages struct {
-	Next string `json:"next"`
 }
 
 // Collection model
@@ -37,7 +32,6 @@ type Collection struct {
 	Includes    map[string]interface{} `json:"includes"`
 	NextSyncURL string                 `json:"nextSyncUrl"`
 	NextPageURL string                 `json:"nextPageUrl"`
-	Pages 		Pages                  `json:"pages"`
 	SyncToken   string
 	// Errors which occur in the contentful structure. They are not checked in
 	// this source code. Please do it yourself as you might still want to parse
@@ -66,37 +60,23 @@ func NewCollection(options *CollectionOptions) *Collection {
 // Next makes the col.req
 func (col *Collection) Next() (*Collection, error) {
 	// setup query params
+	if col.SyncToken != "" {
+		col.Query = *NewQuery()
+		col.Query.SyncToken(col.SyncToken)
+	} else {
+		skip := col.Query.limit * (col.page - 1)
+		col.Query.Skip(skip)
+	}
 
-
-	fmt.Printf("col.pages  %v\n", col.Pages)
-
-
-	// if col.SyncToken != "" {
-	// 	col.Query = *NewQuery()
-	// 	col.Query.SyncToken(col.SyncToken)
-	// } else {
-	// 	skip := col.Query.limit * (col.page - 1)
-	// 	col.Query.Skip(skip)
-	// }
-
-
-	// fmt.Printf("col.req.URL %s\n", col.req.URL)
-	
-	// fmt.Printf("col.req.URL.RawQuery 1 %s\n", col.req.URL.RawQuery)
-
-	// // override request query
-	// if col.Pages.Next != "" {
-	// 	col.req.URL.RawQuery = col.Query.String()
-	// }
-
-	fmt.Printf("col.req.URL.RawQuery 2 %s\n", col.req.URL.RawQuery)
+	// override request query
+	col.req.URL.RawQuery = col.Query.String()
 
 	// makes api call
 	err := col.c.do(col.req, col)
 	if err != nil {
 		return nil, err
 	}
-fmt.Printf("%v", col)
+
 	col.page++
 	r, _ := regexp.Compile("sync_token=([a-zA-Z0-9\\-\\_]+)")
 	if col.NextPageURL != "" {
@@ -161,14 +141,14 @@ func (col *Collection) ToSpace() []*Space {
 	return spaces
 }
 
-// ToSpace cast Items to Space model
+// ToScheduledAction cast Items to ScheduledActions model
 func (col *Collection) ToScheduledAction() []*ScheduledActions {
-	var spaces []*ScheduledActions
+	var scheduledActions []*ScheduledActions
 
 	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&spaces)
+	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&scheduledActions)
 
-	return spaces
+	return scheduledActions
 }
 
 // ToEntry cast Items to Entry model

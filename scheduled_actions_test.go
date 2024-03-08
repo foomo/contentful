@@ -13,7 +13,6 @@ func Test_ExampleScheduledActionsService_Get(t *testing.T) {
 	fmt.Println("HII")
 
 	cma := NewCMA("TOKEN HERE")
-
 	assert.NotNil(t, cma)
 	assert.NotNil(t, cma.ScheduledActions)
 
@@ -22,6 +21,6 @@ func Test_ExampleScheduledActionsService_Get(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
-	fmt.Printf("%v",scheduledActions.Fields)
+
+	fmt.Printf("%v", scheduledActions)
 }
