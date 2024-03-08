@@ -32,6 +32,7 @@ type Contentful struct {
 	Entries      *EntriesService
 	Locales      *LocalesService
 	Webhooks     *WebhooksService
+	ScheduledActions     *ScheduledActionsService
 }
 
 type service struct {
@@ -55,8 +56,8 @@ func NewCMA(token string) *Contentful {
 		Debug:  false,
 		Headers: map[string]string{
 			"Authorization":           fmt.Sprintf("Bearer %s", token),
-			"Content-Type":            "application/vnd.contentful.management.v1+json",
-			"X-Contentful-User-Agent": fmt.Sprintf("sdk contentful.go/%s", Version),
+			// "Content-Type":            "application/vnd.contentful.management.v1+json",
+			// "X-Contentful-User-Agent": fmt.Sprintf("sdk contentful.go/%s", Version),
 		},
 		BaseURL: "https://api.contentful.com",
 	}
@@ -68,6 +69,7 @@ func NewCMA(token string) *Contentful {
 	c.Entries = &EntriesService{c: c}
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
+	c.ScheduledActions = &ScheduledActionsService{c: c}
 
 	return c
 }
@@ -162,6 +164,9 @@ func (c *Contentful) newRequest(method, path string, query url.Values, body io.R
 
 	u.Path = u.Path + path
 	u.RawQuery = query.Encode()
+
+	fmt.Printf("QUERY %s\n",u.RawQuery)
+	fmt.Printf("X %s\n",u.String())
 
 	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
