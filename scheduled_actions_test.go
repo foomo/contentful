@@ -12,19 +12,16 @@ func Test_ExampleScheduledActionsService_Get(t *testing.T) {
 
 	fmt.Println("HII")
 
-	cma := NewCMA("CFPAT-fNuUQMfJ4q5Lo2hX0_hI1EoJp1-dMZN4K5rdtV3bWn8")
+	cma := NewCMA("TOKEN HERE")
 
 	assert.NotNil(t, cma)
 	assert.NotNil(t, cma.ScheduledActions)
 
-	scheduledActions, err := cma.ScheduledActions.List("qfsyzz7ytbcy", "2zgxTOq8CGHMGuusEpnJDq", "master").Next()
+	scheduledActions, err := cma.ScheduledActions.Get("qfsyzz7ytbcy", "2zgxTOq8CGHMGuusEpnJDq", "master")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 	
-	spaces := scheduledActions.ToScheduledAction()
-	for _, space := range spaces {
-		fmt.Println(space.Sys.ID, space.Fields)
-	}
+	fmt.Printf("%v",scheduledActions.Fields)
 }

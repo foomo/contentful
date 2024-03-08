@@ -47,7 +47,7 @@ type ScheduledActions struct {
 // }
 
 // Get returns a single scheduledActions entity
-func (service *ScheduledActionsService) List(spaceID string, entryID string, environmentID string) *Collection {
+func (service *ScheduledActionsService) Get(spaceID string, entryID string, environmentID string) (*ScheduledActions, error) {
 	// path := "/spaces/qfsyzz7ytbcy/scheduled_actions"
 	// path := fmt.Sprintf("/spaces/%s%s/scheduled_actions/%s", spaceID, getEnvPath(service.c), entryID)
 	path := fmt.Sprintf("/spaces/%s/scheduled_actions", spaceID)
@@ -57,8 +57,9 @@ func (service *ScheduledActionsService) List(spaceID string, entryID string, env
 
 	query := url.Values{}
 	
-	// query.Add("entity.sys.id", "2zgxTOq8CGHMGuusEpnJDq")
+	query.Add("entity.sys.id", "2zgxTOq8CGHMGuusEpnJDq")
 	query.Add("environment.sys.id", "master")
+	query.Add("status[in]", "scheduled")
 
 	fmt.Println(query)
 
@@ -69,15 +70,15 @@ func (service *ScheduledActionsService) List(spaceID string, entryID string, env
 	req, err := service.c.newRequest(method, path, query, nil)
 
 	if err != nil {
-		return &Collection{}
+		return &ScheduledActions{}, err
 	}
 
-	
-	col := NewCollection(&CollectionOptions{})
-	col.c = service.c
-	col.req = req
+	var scheduled_actions ScheduledActions
+	if ok := service.c.do(req, &scheduled_actions); ok != nil {
+		return &ScheduledActions{}, ok
+	}
 
-	return col
+	return &scheduled_actions, nil
 }
 
 // // Upsert updates or creates a new scheduledActions
