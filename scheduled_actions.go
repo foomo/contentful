@@ -27,8 +27,8 @@ func (service *ScheduledActionsService) Get(spaceID string, entryID string, envi
 
 	query := url.Values{}
 
-	query.Add("entity.sys.id", "2zgxTOq8CGHMGuusEpnJDq")
-	query.Add("environment.sys.id", "master")
+	query.Add("entity.sys.id", entryID)
+	query.Add("environment.sys.id", environmentID)
 	query.Add("sys.status[in]", "scheduled")
 
 	fmt.Println(query)
