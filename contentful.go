@@ -165,9 +165,6 @@ func (c *Contentful) newRequest(method, path string, query url.Values, body io.R
 	u.Path = u.Path + path
 	u.RawQuery = query.Encode()
 
-	fmt.Printf("QUERY %s\n",u.RawQuery)
-	fmt.Printf("X %s\n",u.String())
-
 	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
 		return nil, err

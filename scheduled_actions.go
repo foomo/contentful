@@ -24,16 +24,11 @@ type ScheduledActions struct {
 func (service *ScheduledActionsService) Get(spaceID string, entryID string, environmentID string) (*ScheduledActions, error) {
 	path := fmt.Sprintf("/spaces/%s/scheduled_actions", spaceID)
 
-	fmt.Println(path)
-	fmt.Println(service.c.BaseURL)
-
 	query := url.Values{}
 
 	query.Add("entity.sys.id", entryID)
 	query.Add("environment.sys.id", environmentID)
 	query.Add("sys.status[in]", "scheduled")
-
-	fmt.Println(query)
 
 	method := "GET"
 
@@ -53,6 +48,6 @@ func (service *ScheduledActionsService) Get(spaceID string, entryID string, envi
 	for _, ct := range col.ToScheduledAction() {
 		fmt.Println(ct)
 	}
-	
+
 	return &ScheduledActions{}, nil
 }
