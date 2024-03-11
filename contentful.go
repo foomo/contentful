@@ -25,13 +25,13 @@ type Contentful struct {
 	BaseURL     string
 	Environment string
 
-	Spaces       *SpacesService
-	APIKeys      *APIKeyService
-	Assets       *AssetsService
-	ContentTypes *ContentTypesService
-	Entries      *EntriesService
-	Locales      *LocalesService
-	Webhooks     *WebhooksService
+	Spaces       		 *SpacesService
+	APIKeys      		 *APIKeyService
+	Assets       		 *AssetsService
+	ContentTypes 		 *ContentTypesService
+	Entries      		 *EntriesService
+	Locales      		 *LocalesService
+	Webhooks     		 *WebhooksService
 	ScheduledActions     *ScheduledActionsService
 }
 
@@ -56,8 +56,8 @@ func NewCMA(token string) *Contentful {
 		Debug:  false,
 		Headers: map[string]string{
 			"Authorization":           fmt.Sprintf("Bearer %s", token),
-			// "Content-Type":            "application/vnd.contentful.management.v1+json",
-			// "X-Contentful-User-Agent": fmt.Sprintf("sdk contentful.go/%s", Version),
+			"Content-Type":            "application/vnd.contentful.management.v1+json",
+			"X-Contentful-User-Agent": fmt.Sprintf("sdk contentful.go/%s", Version),
 		},
 		BaseURL: "https://api.contentful.com",
 	}

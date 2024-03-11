@@ -10,13 +10,11 @@ import (
 
 func Test_ExampleScheduledActionsService_Get(t *testing.T) {
 
-	fmt.Println("HII")
-
-	cma := NewCMA("TOKEN HERE")
+	cma := NewCMA("cma-token")
 	assert.NotNil(t, cma)
 	assert.NotNil(t, cma.ScheduledActions)
 
-	scheduledActions, err := cma.ScheduledActions.Get("qfsyzz7ytbcy", "2zgxTOq8CGHMGuusEpnJDq", "master")
+	scheduledActions, err := cma.ScheduledActions.Get("space-id", "entry-id", "env")
 
 	if err != nil {
 		log.Fatal(err)

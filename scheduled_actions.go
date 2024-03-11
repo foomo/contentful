@@ -8,14 +8,16 @@ import (
 // SpacesService model
 type ScheduledActionsService service
 
+type ScheduledFor struct {
+	Datetime string `json:"datetime,omitempty"`
+	Timezone string `json:"timezone,omitempty"`
+}
+
 // ScheduledActions model
 type ScheduledActions struct {
-	Sys         *Sys   `json:"sys,omitempty"`
-	Action      string `json:"action,omitempty"`
-	ScheduleFor struct {
-		Datetime string `json:"datetime,omitempty"`
-		TimeZone string `json:"timezone,omitempty"`
-	} `json:"scheduledFor,omitempty"`
+	Sys          *Sys   		 `json:"sys,omitempty"`
+	Action       string 		 `json:"action,omitempty"`
+	ScheduledFor *ScheduledFor   `json:"scheduledFor,omitempty"`
 }
 
 // Get returns a single scheduledActions entity
@@ -51,5 +53,6 @@ func (service *ScheduledActionsService) Get(spaceID string, entryID string, envi
 	for _, ct := range col.ToScheduledAction() {
 		fmt.Println(ct)
 	}
+	
 	return &ScheduledActions{}, nil
 }
