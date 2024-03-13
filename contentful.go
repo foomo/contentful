@@ -25,13 +25,14 @@ type Contentful struct {
 	BaseURL     string
 	Environment string
 
-	Spaces       *SpacesService
-	APIKeys      *APIKeyService
-	Assets       *AssetsService
-	ContentTypes *ContentTypesService
-	Entries      *EntriesService
-	Locales      *LocalesService
-	Webhooks     *WebhooksService
+	Spaces       		 *SpacesService
+	APIKeys      		 *APIKeyService
+	Assets       		 *AssetsService
+	ContentTypes 		 *ContentTypesService
+	Entries      		 *EntriesService
+	Locales      		 *LocalesService
+	Webhooks     		 *WebhooksService
+	ScheduledActions     *ScheduledActionsService
 }
 
 type service struct {
@@ -68,6 +69,7 @@ func NewCMA(token string) *Contentful {
 	c.Entries = &EntriesService{c: c}
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
+	c.ScheduledActions = &ScheduledActionsService{c: c}
 
 	return c
 }

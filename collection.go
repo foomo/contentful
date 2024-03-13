@@ -141,6 +141,16 @@ func (col *Collection) ToSpace() []*Space {
 	return spaces
 }
 
+// ToScheduledAction cast Items to ScheduledActions model
+func (col *Collection) ToScheduledAction() []*ScheduledActions {
+	var scheduledActions []*ScheduledActions
+
+	byteArray, _ := json.Marshal(col.Items)
+	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&scheduledActions)
+
+	return scheduledActions
+}
+
 // ToEntry cast Items to Entry model
 func (col *Collection) ToEntry() []*Entry {
 	var entries []*Entry
