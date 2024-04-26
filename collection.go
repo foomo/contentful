@@ -41,6 +41,8 @@ type Collection struct {
 	Details *ErrorDetails
 }
 
+var syncTokenRegex = regexp.MustCompile(`sync_token=([a-zA-Z0-9\\-_]+)`)
+
 // NewCollection initializes a new collection
 func NewCollection(options *CollectionOptions) *Collection {
 	query := NewQuery()
@@ -78,12 +80,11 @@ func (col *Collection) Next() (*Collection, error) {
 	}
 
 	col.page++
-	r, _ := regexp.Compile("sync_token=([a-zA-Z0-9\\-\\_]+)")
 	if col.NextPageURL != "" {
-		syncToken := r.FindStringSubmatch(col.NextPageURL)
+		syncToken := syncTokenRegex.FindStringSubmatch(col.NextPageURL)
 		col.SyncToken = syncToken[1]
 	} else if col.NextSyncURL != "" {
-		syncToken := r.FindStringSubmatch(col.NextSyncURL)
+		syncToken := syncTokenRegex.FindStringSubmatch(col.NextSyncURL)
 		col.SyncToken = syncToken[1]
 	}
 	return col, nil
@@ -122,140 +123,192 @@ func (col *Collection) GetAll() (*Collection, error) {
 }
 
 // ToContentType cast Items to ContentType model
-func (col *Collection) ToContentType() []*ContentType {
+func (col *Collection) ToContentType() ([]*ContentType, error) {
 	var contentTypes []*ContentType
 
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&contentTypes)
+	byteArray, err := json.Marshal(col.Items)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&contentTypes); err != nil {
+		return nil, err
+	}
 
-	return contentTypes
+	return contentTypes, nil
 }
 
 // ToSpace cast Items to Space model
-func (col *Collection) ToSpace() []*Space {
+func (col *Collection) ToSpace() ([]*Space, error) {
 	var spaces []*Space
 
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&spaces)
+	byteArray, err := json.Marshal(col.Items)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&spaces); err != nil {
+		return nil, err
+	}
 
-	return spaces
-}
-
-// ToScheduledAction cast Items to ScheduledActions model
-func (col *Collection) ToScheduledAction() []*ScheduledActions {
-	var scheduledActions []*ScheduledActions
-
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&scheduledActions)
-
-	return scheduledActions
+	return spaces, nil
 }
 
 // ToEntry cast Items to Entry model
-func (col *Collection) ToEntry() []*Entry {
+func (col *Collection) ToEntry() ([]*Entry, error) {
 	var entries []*Entry
 
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&entries)
+	byteArray, err := json.Marshal(col.Items)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&entries); err != nil {
+		return nil, err
+	}
 
-	return entries
+	return entries, nil
 }
 
 // ToLocale cast Items to Locale model
-func (col *Collection) ToLocale() []*Locale {
+func (col *Collection) ToLocale() ([]*Locale, error) {
 	var locales []*Locale
 
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&locales)
+	byteArray, err := json.Marshal(col.Items)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&locales); err != nil {
+		return nil, err
+	}
 
-	return locales
+	return locales, nil
 }
 
 // ToAsset cast Items to Asset model
-func (col *Collection) ToAsset() []*Asset {
+func (col *Collection) ToAsset() ([]*Asset, error) {
 	var assets []*Asset
 
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&assets)
+	byteArray, err := json.Marshal(col.Items)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&assets); err != nil {
+		return nil, err
+	}
 
-	return assets
+	return assets, nil
 }
 
 // ToAPIKey cast Items to APIKey model
-func (col *Collection) ToAPIKey() []*APIKey {
+func (col *Collection) ToAPIKey() ([]*APIKey, error) {
 	var apiKeys []*APIKey
 
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&apiKeys)
+	byteArray, err := json.Marshal(col.Items)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&apiKeys); err != nil {
+		return nil, err
+	}
 
-	return apiKeys
+	return apiKeys, nil
 }
 
 // ToWebhook cast Items to Webhook model
-func (col *Collection) ToWebhook() []*Webhook {
+func (col *Collection) ToWebhook() ([]*Webhook, error) {
 	var webhooks []*Webhook
 
-	byteArray, _ := json.Marshal(col.Items)
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&webhooks)
+	byteArray, err := json.Marshal(col.Items)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&webhooks); err != nil {
+		return nil, err
+	}
 
-	return webhooks
+	return webhooks, nil
 }
 
 // ToIncludesEntry cast includesEntry to Entry model
-func (col *Collection) ToIncludesEntry() []*Entry {
+func (col *Collection) ToIncludesEntry() ([]*Entry, error) {
 	var includesEntry []*Entry
 
-	byteArray, _ := json.Marshal(col.Includes["Entry"])
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesEntry)
-	return includesEntry
+	byteArray, err := json.Marshal(col.Includes["Entry"])
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesEntry); err != nil {
+		return nil, err
+	}
+
+	return includesEntry, nil
 }
 
 // ToIncludesEntryMap returns a map of Entry's from the Includes
-func (col *Collection) ToIncludesEntryMap() map[string]*Entry {
+func (col *Collection) ToIncludesEntryMap() (map[string]*Entry, error) {
 	var includesEntry []*Entry
 	includesEntryMap := make(map[string]*Entry)
 
-	byteArray, _ := json.Marshal(col.Includes["Entry"])
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesEntry)
+	byteArray, err := json.Marshal(col.Includes["Entry"])
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesEntry); err != nil {
+		return nil, err
+	}
+
 	for _, e := range includesEntry {
 		includesEntryMap[e.Sys.ID] = e
 	}
-	return includesEntryMap
+	return includesEntryMap, nil
 }
 
 // ToIncludesAsset cast includesAsset to Asset model
-func (col *Collection) ToIncludesAsset() []*IncludeAsset {
+func (col *Collection) ToIncludesAsset() ([]*IncludeAsset, error) {
 	var includesAsset []*IncludeAsset
 
-	byteArray, _ := json.Marshal(col.Includes["Asset"])
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset)
-	return includesAsset
+	byteArray, err := json.Marshal(col.Includes["Asset"])
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset); err != nil {
+		return nil, err
+	}
+	return includesAsset, nil
 }
 
 // ToIncludesAssetMap returns a map of Asset's from the Includes
-func (col *Collection) ToIncludesAssetMap() map[string]*IncludeAsset {
+func (col *Collection) ToIncludesAssetMap() (map[string]*IncludeAsset, error) {
 	var includesAsset []*IncludeAsset
 	includesAssetMap := make(map[string]*IncludeAsset)
 
-	byteArray, _ := json.Marshal(col.Includes["Asset"])
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset)
+	byteArray, err := json.Marshal(col.Includes["Asset"])
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset); err != nil {
+		return nil, err
+	}
 
 	for _, a := range includesAsset {
 		includesAssetMap[a.Sys.ID] = a
 	}
-	return includesAssetMap
+	return includesAssetMap, nil
 }
 
 // ToIncludesLocalizedAssetMap returns a map of Asset's from the Includes
-func (col *Collection) ToIncludesLocalizedAssetMap() map[string]*Asset {
+func (col *Collection) ToIncludesLocalizedAssetMap() (map[string]*Asset, error) {
 	var includesAsset []*Asset
 	includesAssetMap := make(map[string]*Asset)
 
-	byteArray, _ := json.Marshal(col.Includes["Asset"])
-	json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset)
+	byteArray, err := json.Marshal(col.Includes["Asset"])
+	if err != nil {
+		return nil, err
+	}
+	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&includesAsset); err != nil {
+		return nil, err
+	}
 
 	for _, a := range includesAsset {
 		includesAssetMap[a.Sys.ID] = a
 	}
-	return includesAssetMap
+	return includesAssetMap, nil
 }

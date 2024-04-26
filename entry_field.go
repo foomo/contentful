@@ -13,7 +13,7 @@ func (ef *EntryField) String() string {
 	return ef.value.(string)
 }
 
-//LString returns the given lovale
+// LString returns the given lovale
 func (ef *EntryField) LString(locale string) string {
 	m := ef.value.(map[string]interface{})
 
@@ -24,12 +24,12 @@ func (ef *EntryField) LString(locale string) string {
 	panic("no such a locale")
 }
 
-//Integer converts interface to integer
+// Integer converts interface to integer
 func (ef *EntryField) Integer() int {
 	return int(ef.value.(float64))
 }
 
-//LInteger converts interface to integer
+// LInteger converts interface to integer
 func (ef *EntryField) LInteger(locale string) int {
 	m := ef.value.(map[string]interface{})
 
@@ -40,7 +40,7 @@ func (ef *EntryField) LInteger(locale string) int {
 	panic("no such a locale")
 }
 
-//Array converts interface to slice
+// Array converts interface to slice
 func (ef *EntryField) Array() []string {
 	res := []string{}
 
@@ -56,7 +56,7 @@ func (ef *EntryField) Array() []string {
 	return res
 }
 
-//LArray converts interface to slice
+// LArray converts interface to slice
 func (ef *EntryField) LArray(locale string) []string {
 	m := ef.value.(map[string]interface{})
 
@@ -78,14 +78,14 @@ func (ef *EntryField) LArray(locale string) []string {
 	panic("no such a locale")
 }
 
-//LinkID returns link model
+// LinkID returns link model
 func (ef *EntryField) LinkID() string {
 	m := ef.value.(map[string]interface{})
 	sys := m["sys"].(map[string]interface{})
 	return sys["id"].(string)
 }
 
-//LLinkID returns link model
+// LLinkID returns link model
 func (ef *EntryField) LLinkID(locale string) string {
 	m := ef.value.(map[string]interface{})
 
@@ -98,14 +98,14 @@ func (ef *EntryField) LLinkID(locale string) string {
 	panic("no such a locale")
 }
 
-//LinkType returns link model
+// LinkType returns link model
 func (ef *EntryField) LinkType() string {
 	m := ef.value.(map[string]interface{})
 	sys := m["sys"].(map[string]interface{})
 	return sys["linkType"].(string)
 }
 
-//LLinkType returns link model
+// LLinkType returns link model
 func (ef *EntryField) LLinkType(locale string) string {
 	m := ef.value.(map[string]interface{})
 
@@ -118,7 +118,7 @@ func (ef *EntryField) LLinkType(locale string) string {
 	panic("no such a locale")
 }
 
-//Asset returns the linked asset
+// Asset returns the linked asset
 func (ef *EntryField) Asset() *Asset {
 	if ef.LinkType() != "Asset" {
 		panic("you can only convert asset types")
@@ -128,7 +128,7 @@ func (ef *EntryField) Asset() *Asset {
 	return &Asset{}
 }
 
-//LAsset returns the linked asset
+// LAsset returns the linked asset
 func (ef *EntryField) LAsset(locale string) *Asset {
 	if ef.LLinkType(locale) != "Asset" {
 		panic("you can only convert asset types")
@@ -138,7 +138,7 @@ func (ef *EntryField) LAsset(locale string) *Asset {
 	return &Asset{}
 }
 
-//Entry returns the linked entry
+// Entry returns the linked entry
 func (ef *EntryField) Entry() *Entry {
 	if ef.LinkType() != "Entry" {
 		panic("you can only convert entry types")
@@ -148,7 +148,7 @@ func (ef *EntryField) Entry() *Entry {
 	return &Entry{}
 }
 
-//LEntry returns the linked entry
+// LEntry returns the linked entry
 func (ef *EntryField) LEntry(locale string) *Entry {
 	if ef.LLinkType(locale) != "Entry" {
 		panic("you can only convert entry types")

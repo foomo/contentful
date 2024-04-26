@@ -1,6 +1,7 @@
 package contentful
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,7 +18,7 @@ func TestNewCollection(t *testing.T) {
 			Filename: "error-notResolvable.json",
 		})
 
-		req, err := c.newRequest("GET", "/", url.Values{}, nil)
+		req, err := c.newRequest(context.TODO(), http.MethodGet, "/", url.Values{}, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -48,7 +49,7 @@ func TestNewCollection(t *testing.T) {
 			Filename: "error-nameUnknown.json",
 		})
 
-		req, err := c.newRequest("GET", "/", url.Values{}, nil)
+		req, err := c.newRequest(context.TODO(), http.MethodGet, "/", url.Values{}, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -82,7 +83,7 @@ type roundTrip struct {
 
 func (rt roundTrip) RoundTrip(*http.Request) (*http.Response, error) {
 	if rt.Code == 0 {
-		rt.Code = http.StatusOK
+		rt.Code = http.StatusOK //nolint:revive
 	}
 	f, err := os.Open("testdata/" + rt.Filename)
 	if err != nil {

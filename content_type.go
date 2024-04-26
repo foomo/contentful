@@ -2,8 +2,10 @@ package contentful
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 )
 
@@ -88,7 +90,7 @@ func (field *Field) UnmarshalJSON(data []byte) error {
 	if val, ok := payload["items"]; ok {
 		byteArray, err := json.Marshal(val)
 		if err != nil {
-			return nil
+			return err
 		}
 
 		var fieldTypeArrayItem FieldTypeArrayItem
@@ -128,7 +130,9 @@ func (field *Field) UnmarshalJSON(data []byte) error {
 }
 
 // ParseValidations converts json representation to go struct
-func ParseValidations(data []interface{}) (validations []FieldValidation, err error) {
+func ParseValidations(data []interface{}) ([]FieldValidation, error) {
+	var err error
+	var validations []FieldValidation
 	for _, value := range data {
 		var validation map[string]interface{}
 		var byteArray []byte
@@ -289,11 +293,10 @@ func (ct *ContentType) GetVersion() int {
 }
 
 // List return a content type collection
-func (service *ContentTypesService) List(spaceID string) *Collection {
+func (service *ContentTypesService) List(ctx context.Context, spaceID string) *Collection {
 	path := fmt.Sprintf("/spaces/%s%s/content_types", spaceID, getEnvPath(service.c))
-	method := "GET"
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil
 	}
@@ -306,11 +309,10 @@ func (service *ContentTypesService) List(spaceID string) *Collection {
 }
 
 // Get fetched a content type specified by `contentTypeID`
-func (service *ContentTypesService) Get(spaceID, contentTypeID string) (*ContentType, error) {
+func (service *ContentTypesService) Get(ctx context.Context, spaceID, contentTypeID string) (*ContentType, error) {
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s", spaceID, getEnvPath(service.c), contentTypeID)
-	method := "GET"
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -324,7 +326,7 @@ func (service *ContentTypesService) Get(spaceID, contentTypeID string) (*Content
 }
 
 // Upsert updates or creates a new content type
-func (service *ContentTypesService) Upsert(spaceID string, ct *ContentType) error {
+func (service *ContentTypesService) Upsert(ctx context.Context, spaceID string, ct *ContentType) error {
 	bytesArray, err := json.Marshal(ct)
 	if err != nil {
 		return err
@@ -341,7 +343,7 @@ func (service *ContentTypesService) Upsert(spaceID string, ct *ContentType) erro
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
 	if err != nil {
 		return err
 	}
@@ -352,11 +354,11 @@ func (service *ContentTypesService) Upsert(spaceID string, ct *ContentType) erro
 }
 
 // Delete the content_type
-func (service *ContentTypesService) Delete(spaceID string, ct *ContentType) error {
+func (service *ContentTypesService) Delete(ctx context.Context, spaceID string, ct *ContentType) error {
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s", spaceID, getEnvPath(service.c), ct.Sys.ID)
-	method := "DELETE"
+	method := http.MethodDelete
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -368,11 +370,10 @@ func (service *ContentTypesService) Delete(spaceID string, ct *ContentType) erro
 }
 
 // Activate the contenttype, a.k.a publish
-func (service *ContentTypesService) Activate(spaceID string, ct *ContentType) error {
+func (service *ContentTypesService) Activate(ctx context.Context, spaceID string, ct *ContentType) error {
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s/published", spaceID, getEnvPath(service.c), ct.Sys.ID)
-	method := "PUT"
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodPut, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -384,11 +385,10 @@ func (service *ContentTypesService) Activate(spaceID string, ct *ContentType) er
 }
 
 // Deactivate the contenttype, a.k.a unpublish
-func (service *ContentTypesService) Deactivate(spaceID string, ct *ContentType) error {
+func (service *ContentTypesService) Deactivate(ctx context.Context, spaceID string, ct *ContentType) error {
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s/published", spaceID, getEnvPath(service.c), ct.Sys.ID)
-	method := "DELETE"
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return err
 	}

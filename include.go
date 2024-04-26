@@ -1,6 +1,6 @@
 package contentful
 
-//IncludeEntry model
+// IncludeEntry model
 type IncludeEntry struct {
 	Fields map[string]interface{} `json:"fields,omitempty"`
 	Sys    *Sys                   `json:"sys"`

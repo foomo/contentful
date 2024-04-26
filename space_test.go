@@ -1,6 +1,7 @@
 package contentful
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,14 +10,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func ExampleSpacesService_Get() {
 	cma := NewCMA("cma-token")
 
-	space, err := cma.Spaces.Get("space-id")
+	space, err := cma.Spaces.Get(context.TODO(), "space-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
 	fmt.Println(space.Name)
@@ -24,12 +26,16 @@ func ExampleSpacesService_Get() {
 
 func ExampleSpacesService_List() {
 	cma := NewCMA("cma-token")
-	collection, err := cma.Spaces.List().Next()
+	collection, err := cma.Spaces.List(context.TODO()).Next()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	spaces := collection.ToSpace()
+	spaces, err := collection.ToSpace()
+	if err != nil {
+		log.Fatal(err) //nolint:revive
+	}
+
 	for _, space := range spaces {
 		fmt.Println(space.Sys.ID, space.Name)
 	}
@@ -43,69 +49,72 @@ func ExampleSpacesService_Upsert_create() {
 		DefaultLocale: "en-US",
 	}
 
-	err := cma.Spaces.Upsert(space)
+	err := cma.Spaces.Upsert(context.TODO(), space)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleSpacesService_Upsert_update() {
 	cma := NewCMA("cma-token")
 
-	space, err := cma.Spaces.Get("space-id")
+	space, err := cma.Spaces.Get(context.TODO(), "space-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
 	space.Name = "modified"
-	err = cma.Spaces.Upsert(space)
+	err = cma.Spaces.Upsert(context.TODO(), space)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleSpacesService_Delete() {
 	cma := NewCMA("cma-token")
 
-	space, err := cma.Spaces.Get("space-id")
+	space, err := cma.Spaces.Get(context.TODO(), "space-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	err = cma.Spaces.Delete(space)
+	err = cma.Spaces.Delete(context.TODO(), space)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleSpacesService_Delete_all() {
 	cma := NewCMA("cma-token")
 
-	collection, err := cma.Spaces.List().Next()
+	collection, err := cma.Spaces.List(context.TODO()).Next()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	for _, space := range collection.ToSpace() {
-		err := cma.Spaces.Delete(space)
+	spaces, err := collection.ToSpace()
+	if err != nil {
+		log.Fatal(err) //nolint:revive
+	}
+
+	for _, space := range spaces {
+		err := cma.Spaces.Delete(context.TODO(), space)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(err) //nolint:revive
 		}
 	}
 }
 
 func TestSpacesServiceList(t *testing.T) {
 	var err error
-	assert := assert.New(t)
-
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "GET")
-		assert.Equal(r.URL.Path, "/spaces")
+		assert.Equal(t, http.MethodGet, r.Method)
+		assert.Equal(t, "/spaces", r.URL.Path)
 
-		checkHeaders(r, assert)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, readTestData("spaces.json"))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "spaces.json"))
 	})
 
 	// test server
@@ -116,27 +125,26 @@ func TestSpacesServiceList(t *testing.T) {
 	cma = NewCMA(CMAToken)
 	cma.BaseURL = server.URL
 
-	collection, err := cma.Spaces.List().Next()
-	assert.Nil(err)
+	collection, err := cma.Spaces.List(context.TODO()).Next()
+	require.NoError(t, err)
 
-	spaces := collection.ToSpace()
-	assert.Equal(2, len(spaces))
-	assert.Equal("id1", spaces[0].Sys.ID)
-	assert.Equal("id2", spaces[1].Sys.ID)
+	spaces, err := collection.ToSpace()
+	require.NoError(t, err)
+	assert.Len(t, spaces, 2)
+	assert.Equal(t, "id1", spaces[0].Sys.ID)
+	assert.Equal(t, "id2", spaces[1].Sys.ID)
 }
 
 func TestSpacesServiceGet(t *testing.T) {
 	var err error
-	assert := assert.New(t)
-
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "GET")
-		assert.Equal(r.URL.Path, "/spaces/"+spaceID)
+		assert.Equal(t, http.MethodGet, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID, r.URL.Path)
 
-		checkHeaders(r, assert)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, readTestData("space-1.json"))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "space-1.json"))
 	})
 
 	// test server
@@ -147,27 +155,25 @@ func TestSpacesServiceGet(t *testing.T) {
 	cma = NewCMA(CMAToken)
 	cma.BaseURL = server.URL
 
-	space, err := cma.Spaces.Get(spaceID)
-	assert.Nil(err)
-	assert.Equal("id1", space.Sys.ID)
+	space, err := cma.Spaces.Get(context.TODO(), spaceID)
+	require.NoError(t, err)
+	assert.Equal(t, "id1", space.Sys.ID)
 }
 
 func TestSpaceSaveForCreate(t *testing.T) {
-	assert := assert.New(t)
-
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
-		assert.Equal("new space", payload["name"])
-		assert.Equal("en", payload["defaultLocale"])
+		require.NoError(t, err)
+		assert.Equal(t, "new space", payload["name"])
+		assert.Equal(t, "en", payload["defaultLocale"])
 
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("spaces-newspace.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "spaces-newspace.json"))
 	})
 
 	// test server
@@ -183,30 +189,28 @@ func TestSpaceSaveForCreate(t *testing.T) {
 		DefaultLocale: "en",
 	}
 
-	err := cma.Spaces.Upsert(space)
-	assert.Nil(err)
-	assert.Equal("newspace", space.Sys.ID)
-	assert.Equal("new space", space.Name)
-	assert.Equal("en", space.DefaultLocale)
+	err := cma.Spaces.Upsert(context.TODO(), space)
+	require.NoError(t, err)
+	assert.Equal(t, "newspace", space.Sys.ID)
+	assert.Equal(t, "new space", space.Name)
+	assert.Equal(t, "en", space.DefaultLocale)
 }
 
 func TestSpaceSaveForUpdate(t *testing.T) {
 	var err error
-	assert := assert.New(t)
-
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "PUT")
-		assert.Equal(r.RequestURI, "/spaces/newspace")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPut, r.Method)
+		assert.Equal(t, "/spaces/newspace", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
-		assert.Equal("changed-space-name", payload["name"])
-		assert.Equal("de", payload["defaultLocale"])
+		require.NoError(t, err)
+		assert.Equal(t, "changed-space-name", payload["name"])
+		assert.Equal(t, "de", payload["defaultLocale"])
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, string(readTestData("spaces-newspace-updated.json")))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "spaces-newspace-updated.json"))
 	})
 
 	// test server
@@ -217,29 +221,28 @@ func TestSpaceSaveForUpdate(t *testing.T) {
 	cma = NewCMA(CMAToken)
 	cma.BaseURL = server.URL
 
-	space, err := spaceFromTestData("spaces-newspace.json")
-	assert.Nil(err)
+	space, err := spaceFromTestData(t, "spaces-newspace.json")
+	require.NoError(t, err)
 
 	space.Name = "changed-space-name"
 	space.DefaultLocale = "de"
 
-	err = cma.Spaces.Upsert(space)
-	assert.Nil(err)
-	assert.Equal("changed-space-name", space.Name)
-	assert.Equal("de", space.DefaultLocale)
-	assert.Equal(2, space.Sys.Version)
+	err = cma.Spaces.Upsert(context.TODO(), space)
+	require.NoError(t, err)
+	assert.Equal(t, "changed-space-name", space.Name)
+	assert.Equal(t, "de", space.DefaultLocale)
+	assert.Equal(t, 2, space.Sys.Version)
 }
 
 func TestSpaceDelete(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "DELETE")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID)
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodDelete, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID, r.RequestURI)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	})
 
 	// test server
@@ -250,9 +253,9 @@ func TestSpaceDelete(t *testing.T) {
 	cma = NewCMA(CMAToken)
 	cma.BaseURL = server.URL
 
-	space, err := spaceFromTestData("spaces-" + spaceID + ".json")
-	assert.Nil(err)
+	space, err := spaceFromTestData(t, "spaces-"+spaceID+".json")
+	require.NoError(t, err)
 
-	err = cma.Spaces.Delete(space)
-	assert.Nil(err)
+	err = cma.Spaces.Delete(context.TODO(), space)
+	require.NoError(t, err)
 }

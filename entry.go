@@ -2,8 +2,10 @@ package contentful
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -11,9 +13,8 @@ import (
 // EntriesService servıce
 type EntriesService service
 
-//Entry model
+// Entry model
 type Entry struct {
-	locale string
 	Sys    *Sys                   `json:"sys"`
 	Fields map[string]interface{} `json:"fields,omitempty"`
 }
@@ -29,17 +30,22 @@ func (entry *Entry) GetVersion() int {
 }
 
 // GetEntryKey returns the entry's keys
-func (service *EntriesService) GetEntryKey(entry *Entry, key string) (*EntryField, error) {
+func (service *EntriesService) GetEntryKey(ctx context.Context, entry *Entry, key string) (*EntryField, error) {
 	ef := EntryField{
 		value: entry.Fields[key],
 	}
 
-	col, err := service.c.ContentTypes.List(entry.Sys.Space.Sys.ID).Next()
+	col, err := service.c.ContentTypes.List(ctx, entry.Sys.Space.Sys.ID).Next()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, ct := range col.ToContentType() {
+	cts, err := col.ToContentType()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ct := range cts {
 		if ct.Sys.ID != entry.Sys.ContentType.Sys.ID {
 			continue
 		}
@@ -57,11 +63,11 @@ func (service *EntriesService) GetEntryKey(entry *Entry, key string) (*EntryFiel
 }
 
 // List returns entries collection
-func (service *EntriesService) List(spaceID string) *Collection {
+func (service *EntriesService) List(ctx context.Context, spaceID string) *Collection {
 	path := fmt.Sprintf("/spaces/%s%s/entries", spaceID, getEnvPath(service.c))
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -74,17 +80,17 @@ func (service *EntriesService) List(spaceID string) *Collection {
 }
 
 // Sync returns entries collection
-func (service *EntriesService) Sync(spaceID string, initial bool, syncToken ...string) *Collection {
+func (service *EntriesService) Sync(ctx context.Context, spaceID string, initial bool, syncToken ...string) *Collection {
 	path := fmt.Sprintf("/spaces/%s%s/sync", spaceID, getEnvPath(service.c))
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
 
 	col := NewCollection(&CollectionOptions{})
-	if initial == true {
+	if initial {
 		col.Query.Initial("true")
 	}
 	if len(syncToken) == 1 {
@@ -97,15 +103,15 @@ func (service *EntriesService) Sync(spaceID string, initial bool, syncToken ...s
 }
 
 // Get returns a single entry
-func (service *EntriesService) Get(spaceID, entryID string, locale ...string) (*Entry, error) {
+func (service *EntriesService) Get(ctx context.Context, spaceID, entryID string, locale ...string) (*Entry, error) {
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s", spaceID, getEnvPath(service.c), entryID)
 	query := url.Values{}
 	if len(locale) > 0 {
 		query["locale"] = locale
 	}
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, query, nil)
+	req, err := service.c.newRequest(ctx, method, path, query, nil)
 	if err != nil {
 		return &Entry{}, err
 	}
@@ -119,11 +125,11 @@ func (service *EntriesService) Get(spaceID, entryID string, locale ...string) (*
 }
 
 // Delete the entry
-func (service *EntriesService) Delete(spaceID string, entryID string) error {
+func (service *EntriesService) Delete(ctx context.Context, spaceID string, entryID string) error {
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s", spaceID, getEnvPath(service.c), entryID)
-	method := "DELETE"
+	method := http.MethodDelete
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -132,7 +138,7 @@ func (service *EntriesService) Delete(spaceID string, entryID string) error {
 }
 
 // Upsert updates or creates a new entry
-func (service *EntriesService) Upsert(spaceID string, entry *Entry) error {
+func (service *EntriesService) Upsert(ctx context.Context, spaceID string, entry *Entry) error {
 	fieldsOnly := map[string]interface{}{
 		"fields": entry.Fields,
 	}
@@ -158,7 +164,7 @@ func (service *EntriesService) Upsert(spaceID string, entry *Entry) error {
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
 	if err != nil {
 		return err
 	}
@@ -170,11 +176,11 @@ func (service *EntriesService) Upsert(spaceID string, entry *Entry) error {
 }
 
 // Publish the entry
-func (service *EntriesService) Publish(spaceID string, entry *Entry) error {
+func (service *EntriesService) Publish(ctx context.Context, spaceID string, entry *Entry) error {
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s/published", spaceID, getEnvPath(service.c), entry.Sys.ID)
-	method := "PUT"
+	method := http.MethodPut
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -186,11 +192,11 @@ func (service *EntriesService) Publish(spaceID string, entry *Entry) error {
 }
 
 // Unpublish the entry
-func (service *EntriesService) Unpublish(spaceID string, entry *Entry) error {
+func (service *EntriesService) Unpublish(ctx context.Context, spaceID string, entry *Entry) error {
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s/published", spaceID, getEnvPath(service.c), entry.Sys.ID)
-	method := "DELETE"
+	method := http.MethodDelete
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -202,11 +208,11 @@ func (service *EntriesService) Unpublish(spaceID string, entry *Entry) error {
 }
 
 // Publish the entry
-func (service *EntriesService) Archive(spaceID string, entry *Entry) error {
+func (service *EntriesService) Archive(ctx context.Context, spaceID string, entry *Entry) error {
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s/archived", spaceID, getEnvPath(service.c), entry.Sys.ID)
-	method := "PUT"
+	method := http.MethodPut
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}

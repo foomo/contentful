@@ -2,19 +2,22 @@ package contentful
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -28,100 +31,93 @@ var (
 	organizationID = "org-id"
 )
 
-func readTestData(fileName string) string {
+func readTestData(t *testing.T, fileName string) string {
+	t.Helper()
 	path := "testdata/" + fileName
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-		return ""
-	}
-
+	content, err := os.ReadFile(path)
+	require.NoError(t, err)
 	return string(content)
 }
 
-func checkHeaders(req *http.Request, assert *assert.Assertions) {
-	assert.Equal("Bearer "+CMAToken, req.Header.Get("Authorization"))
-	assert.Equal("application/vnd.contentful.management.v1+json", req.Header.Get("Content-Type"))
+func checkHeaders(t *testing.T, req *http.Request) {
+	t.Helper()
+	assert.Equal(t, "Bearer "+CMAToken, req.Header.Get("Authorization"))
+	assert.Equal(t, "application/vnd.contentful.management.v1+json", req.Header.Get("Content-Type"))
 }
 
-func spaceFromTestData(fileName string) (*Space, error) {
-	content := readTestData(fileName)
+func spaceFromTestData(t *testing.T, fileName string) (*Space, error) {
+	t.Helper()
+	content := readTestData(t, fileName)
 
 	var space Space
 	err := json.NewDecoder(strings.NewReader(content)).Decode(&space)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
 	return &space, nil
 }
 
-func webhookFromTestData(fileName string) (*Webhook, error) {
-	content := readTestData(fileName)
+func webhookFromTestData(t *testing.T, fileName string) (*Webhook, error) {
+	t.Helper()
+	content := readTestData(t, fileName)
 
 	var webhook Webhook
 	err := json.NewDecoder(strings.NewReader(content)).Decode(&webhook)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
 	return &webhook, nil
 }
 
-func contentTypeFromTestData(fileName string) (*ContentType, error) {
-	content := readTestData(fileName)
+func contentTypeFromTestData(t *testing.T, fileName string) (*ContentType, error) {
+	t.Helper()
+	content := readTestData(t, fileName)
 
 	var ct ContentType
 	err := json.NewDecoder(strings.NewReader(content)).Decode(&ct)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
 	return &ct, nil
 }
 
-func localeFromTestData(fileName string) (*Locale, error) {
-	content := readTestData(fileName)
+func localeFromTestData(t *testing.T, fileName string) (*Locale, error) {
+	t.Helper()
+	content := readTestData(t, fileName)
 
 	var locale Locale
 	err := json.NewDecoder(strings.NewReader(content)).Decode(&locale)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
 	return &locale, nil
 }
 
 func setup() {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fixture := strings.Replace(r.URL.Path, "/", "-", -1)
+		fixture := strings.ReplaceAll(r.URL.Path, "/", "-")
 		fixture = strings.TrimLeft(fixture, "-")
 		var path string
 
 		if e := r.URL.Query().Get("error"); e != "" {
 			path = "testdata/error-" + e + ".json"
 		} else {
-			if r.Method == "GET" {
+			if r.Method == http.MethodGet {
 				path = "testdata/" + fixture + ".json"
 			}
 
-			if r.Method == "POST" {
+			if r.Method == http.MethodPost {
 				path = "testdata/" + fixture + "-new.json"
 			}
 
-			if r.Method == "PUT" {
+			if r.Method == http.MethodPut {
 				path = "testdata/" + fixture + "-updated.json"
 			}
 		}
 
-		file, err := ioutil.ReadFile(path)
+		file, err := os.ReadFile(path)
 		if err != nil {
-			fmt.Fprintln(w, err)
+			_, _ = fmt.Fprintln(w, err)
 			return
 		}
 
-		fmt.Fprintln(w, string(file))
-		return
+		_, _ = fmt.Fprintln(w, string(file))
 	})
 
 	server = httptest.NewServer(handler)
@@ -136,65 +132,53 @@ func teardown() {
 }
 
 func TestContentfulNewCMA(t *testing.T) {
-	assert := assert.New(t)
-
 	cma := NewCMA(CMAToken)
-	assert.IsType(Contentful{}, *cma)
-	assert.Equal("https://api.contentful.com", cma.BaseURL)
-	assert.Equal("CMA", cma.api)
-	assert.Equal(CMAToken, cma.token)
-	assert.Equal(fmt.Sprintf("Bearer %s", CMAToken), cma.Headers["Authorization"])
-	assert.Equal("application/vnd.contentful.management.v1+json", cma.Headers["Content-Type"])
-	assert.Equal(fmt.Sprintf("sdk contentful.go/%s", Version), cma.Headers["X-Contentful-User-Agent"])
+	assert.IsType(t, Contentful{}, *cma)
+	assert.Equal(t, "https://api.contentful.com", cma.BaseURL)
+	assert.Equal(t, "CMA", cma.api)
+	assert.Equal(t, CMAToken, cma.token)
+	assert.Equal(t, fmt.Sprintf("Bearer %s", CMAToken), cma.Headers["Authorization"])
+	assert.Equal(t, "application/vnd.contentful.management.v1+json", cma.Headers["Content-Type"])
+	assert.Equal(t, fmt.Sprintf("sdk contentful.go/%s", Version), cma.Headers["X-Contentful-User-Agent"])
 }
 
 func TestContentfulNewCDA(t *testing.T) {
-	assert := assert.New(t)
-
 	cda := NewCDA(CDAToken)
-	assert.IsType(Contentful{}, *cda)
-	assert.Equal("https://cdn.contentful.com", cda.BaseURL)
-	assert.Equal("CDA", cda.api)
-	assert.Equal(CDAToken, cda.token)
-	assert.Equal(fmt.Sprintf("Bearer %s", CDAToken), cda.Headers["Authorization"])
-	assert.Equal("application/vnd.contentful.delivery.v1+json", cda.Headers["Content-Type"])
-	assert.Equal(fmt.Sprintf("contentful-go/%s", Version), cda.Headers["X-Contentful-User-Agent"])
+	assert.IsType(t, Contentful{}, *cda)
+	assert.Equal(t, "https://cdn.contentful.com", cda.BaseURL)
+	assert.Equal(t, "CDA", cda.api)
+	assert.Equal(t, CDAToken, cda.token)
+	assert.Equal(t, fmt.Sprintf("Bearer %s", CDAToken), cda.Headers["Authorization"])
+	assert.Equal(t, "application/vnd.contentful.delivery.v1+json", cda.Headers["Content-Type"])
+	assert.Equal(t, fmt.Sprintf("contentful-go/%s", Version), cda.Headers["X-Contentful-User-Agent"])
 }
 
 func TestContentfulNewCPA(t *testing.T) {
-	assert := assert.New(t)
-
 	cpa := NewCPA(CPAToken)
-	assert.IsType(Contentful{}, *cpa)
-	assert.Equal("https://preview.contentful.com", cpa.BaseURL)
-	assert.Equal("CPA", cpa.api)
-	assert.Equal(CPAToken, cpa.token)
+	assert.IsType(t, Contentful{}, *cpa)
+	assert.Equal(t, "https://preview.contentful.com", cpa.BaseURL)
+	assert.Equal(t, "CPA", cpa.api)
+	assert.Equal(t, CPAToken, cpa.token)
 }
 
 func TestContentfulSetOrganization(t *testing.T) {
-	assert := assert.New(t)
-
 	cma := NewCMA(CMAToken)
 	cma.SetOrganization(organizationID)
-	assert.Equal(organizationID, cma.Headers["X-Contentful-Organization"])
+	assert.Equal(t, organizationID, cma.Headers["X-Contentful-Organization"])
 }
 
 func TestContentfulSetClient(t *testing.T) {
-	assert := assert.New(t)
-
 	newClient := &http.Client{}
 	cma := NewCMA(CMAToken)
 	cma.SetHTTPClient(newClient)
-	assert.Exactly(newClient, cma.client)
+	assert.Exactly(t, newClient, cma.client)
 }
 
 func TestNewRequest(t *testing.T) {
 	setup()
 	defer teardown()
 
-	assert := assert.New(t)
-
-	method := "GET"
+	method := http.MethodGet
 	path := "/some/path"
 	query := url.Values{}
 	query.Add("foo", "bar")
@@ -204,12 +188,12 @@ func TestNewRequest(t *testing.T) {
 	expectedURL.Path = path
 	expectedURL.RawQuery = query.Encode()
 
-	req, err := c.newRequest(method, path, query, nil)
-	assert.Nil(err)
-	assert.Equal(req.Header.Get("Authorization"), "Bearer "+CMAToken)
-	assert.Equal(req.Header.Get("Content-Type"), "application/vnd.contentful.management.v1+json")
-	assert.Equal(req.Method, method)
-	assert.Equal(req.URL.String(), expectedURL.String())
+	req, err := c.newRequest(context.TODO(), method, path, query, nil)
+	require.NoError(t, err)
+	assert.Equal(t, "Bearer "+CMAToken, req.Header.Get("Authorization"))
+	assert.Equal(t, "application/vnd.contentful.management.v1+json", req.Header.Get("Content-Type"))
+	assert.Equal(t, req.Method, method)
+	assert.Equal(t, req.URL.String(), expectedURL.String())
 
 	method = "POST"
 	type RequestBody struct {
@@ -220,27 +204,26 @@ func TestNewRequest(t *testing.T) {
 		Name: "test",
 		Age:  10,
 	}
-	body, _ := json.Marshal(bodyData)
-	req, err = c.newRequest(method, path, query, bytes.NewReader(body))
-	assert.Nil(err)
-	assert.Equal(req.Header.Get("Authorization"), "Bearer "+CMAToken)
-	assert.Equal(req.Header.Get("Content-Type"), "application/vnd.contentful.management.v1+json")
-	assert.Equal(req.Method, method)
-	assert.Equal(req.URL.String(), expectedURL.String())
+	body, err := json.Marshal(bodyData)
+	require.NoError(t, err)
+	req, err = c.newRequest(context.TODO(), method, path, query, bytes.NewReader(body))
+	require.NoError(t, err)
+	assert.Equal(t, "Bearer "+CMAToken, req.Header.Get("Authorization"))
+	assert.Equal(t, "application/vnd.contentful.management.v1+json", req.Header.Get("Content-Type"))
+	assert.Equal(t, req.Method, method)
+	assert.Equal(t, req.URL.String(), expectedURL.String())
 	defer req.Body.Close()
 	var requestBody RequestBody
 	err = json.NewDecoder(req.Body).Decode(&requestBody)
-	assert.Nil(err)
-	assert.Equal(requestBody, bodyData)
+	require.NoError(t, err)
+	assert.Equal(t, requestBody, bodyData)
 }
 
 func TestHandleError(t *testing.T) {
 	setup()
 	defer teardown()
 
-	assert := assert.New(t)
-
-	method := "GET"
+	method := http.MethodGet
 	path := "/some/path"
 	requestID := "request-id"
 	query := url.Values{}
@@ -253,11 +236,13 @@ func TestHandleError(t *testing.T) {
 		RequestID: requestID,
 	}
 
-	marshaled, _ := json.Marshal(errResponse)
+	marshaled, err := json.Marshal(errResponse)
+	require.NoError(t, err)
 	errResponseReader := bytes.NewReader(marshaled)
-	errResponseReadCloser := ioutil.NopCloser(errResponseReader)
+	errResponseReadCloser := io.NopCloser(errResponseReader)
 
-	req, _ := c.newRequest(method, path, query, nil)
+	req, err := c.newRequest(context.TODO(), method, path, query, nil)
+	require.NoError(t, err)
 	responseHeaders := http.Header{}
 	responseHeaders.Add("X-Contentful-Request-Id", requestID)
 	res := &http.Response{
@@ -267,21 +252,20 @@ func TestHandleError(t *testing.T) {
 		Request:    req,
 	}
 
-	err := c.handleError(req, res)
-	assert.IsType(AccessTokenInvalidError{}, err)
-	assert.Equal(req, err.(AccessTokenInvalidError).APIError.req)
-	assert.Equal(res, err.(AccessTokenInvalidError).APIError.res)
-	assert.Equal(&errResponse, err.(AccessTokenInvalidError).APIError.err)
+	err = c.handleError(req, res)
+	assert.IsType(t, AccessTokenInvalidError{}, err)
+	assert.Equal(t, req, err.(AccessTokenInvalidError).APIError.req)          //nolint:errorlint
+	assert.Equal(t, res, err.(AccessTokenInvalidError).APIError.res)          //nolint:errorlint
+	assert.Equal(t, &errResponse, err.(AccessTokenInvalidError).APIError.err) //nolint:errorlint
 }
 
 func TestBackoffForPerSecondLimiting(t *testing.T) {
 	var err error
-	assert := assert.New(t)
-	rateLimited := true
+	var backoff atomic.Bool
 	waitSeconds := 2
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if rateLimited == true {
+		if backoff.Load() {
 			w.Header().Set("X-Contentful-Request-Id", "request-id")
 			w.Header().Set("Content-Type", "application/vnd.contentful.management.v1+json")
 			w.Header().Set("X-Contentful-Ratelimit-Hour-Limit", "36000")
@@ -289,11 +273,11 @@ func TestBackoffForPerSecondLimiting(t *testing.T) {
 			w.Header().Set("X-Contentful-Ratelimit-Reset", strconv.Itoa(waitSeconds))
 			w.Header().Set("X-Contentful-Ratelimit-Second-Limit", "10")
 			w.Header().Set("X-Contentful-Ratelimit-Second-Remaining", "0")
-			w.WriteHeader(429)
+			w.WriteHeader(http.StatusTooManyRequests)
 
-			w.Write([]byte(readTestData("error-ratelimit.json")))
+			_, _ = w.Write([]byte(readTestData(t, "error-ratelimit.json")))
 		} else {
-			w.Write([]byte(readTestData("space-1.json")))
+			_, _ = w.Write([]byte(readTestData(t, "space-1.json")))
 		}
 	})
 
@@ -307,11 +291,11 @@ func TestBackoffForPerSecondLimiting(t *testing.T) {
 
 	go func() {
 		time.Sleep(time.Second * time.Duration(waitSeconds))
-		rateLimited = false
+		backoff.Store(true)
 	}()
 
-	space, err := cma.Spaces.Get("id1")
-	assert.Nil(err)
-	assert.Equal(space.Name, "Contentful Example API")
-	assert.Equal(space.Sys.ID, "id1")
+	space, err := cma.Spaces.Get(context.TODO(), "id1")
+	require.NoError(t, err)
+	assert.Equal(t, "Contentful Example API", space.Name)
+	assert.Equal(t, "id1", space.Sys.ID)
 }

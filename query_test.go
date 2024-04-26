@@ -17,7 +17,7 @@ func TestQueryInclude(t *testing.T) {
 
 	assert.Panics(t, func() {
 		q := NewQuery().Include(11)
-		q.String()
+		_ = q.String()
 	}, "out of range `include` should panic")
 }
 
@@ -25,6 +25,7 @@ func TestQueryContentType(t *testing.T) {
 	q := NewQuery().ContentType("content_type")
 	expected := url.Values{}
 	expected.Set("content_type", "content_type")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -35,6 +36,7 @@ func TestQuerySelect(t *testing.T) {
 
 	expected := url.Values{}
 	expected.Set("content_type", "ct")
+	expected.Set("include", "0")
 	expected.Set("select", "field1,field2")
 	assert.Equal(t, expected.Encode(), q.String())
 
@@ -46,18 +48,18 @@ func TestQuerySelect(t *testing.T) {
 	}, "select needs content_type")
 
 	assert.Panics(t, func() {
-		fields := []string{}
+		var fields []string
 		for i := 0; i < 110; i++ {
 			fields = append(fields, "field"+strconv.Itoa(i))
 		}
 
 		q := NewQuery().Select(fields)
-		q.String()
+		_ = q.String()
 	}, "select accepts 100 fields max")
 
 	assert.Panics(t, func() {
 		q := NewQuery().Select([]string{"field1", "field2.d1", "field3.d2.d3"})
-		q.String()
+		_ = q.String()
 	}, "select accepts depths 3 max")
 }
 
@@ -65,6 +67,7 @@ func TestQueryEqual(t *testing.T) {
 	q := NewQuery().Equal("field1", 10)
 	expected := url.Values{}
 	expected.Set("field1", "10")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	q = q.Equal("field1", "11")
@@ -81,6 +84,7 @@ func TestQueryNotEqual(t *testing.T) {
 	expected := url.Values{}
 
 	expected.Set("field1[ne]", "10")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	q = q.NotEqual("field1", "11")
@@ -96,6 +100,7 @@ func TestQueryAll(t *testing.T) {
 	q := NewQuery().All("field1", []string{"10", "test"})
 	expected := url.Values{}
 	expected.Set("field1[all]", "10,test")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -103,6 +108,7 @@ func TestQueryIn(t *testing.T) {
 	q := NewQuery().In("sys.id", []string{"test", "test2"})
 	expected := url.Values{}
 	expected.Set("sys.id[in]", "test,test2")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -110,6 +116,7 @@ func TestQueryNotIn(t *testing.T) {
 	q := NewQuery().NotIn("sys.id", []string{"test3"})
 	expected := url.Values{}
 	expected.Set("sys.id[nin]", "test3")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -117,6 +124,7 @@ func TestQueryExists(t *testing.T) {
 	q := NewQuery().Exists("sys.id")
 	expected := url.Values{}
 	expected.Set("sys.id[exists]", "true")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -124,6 +132,7 @@ func TestQueryNotExists(t *testing.T) {
 	q := NewQuery().NotExists("sys.id")
 	expected := url.Values{}
 	expected.Set("sys.id[exists]", "false")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -131,12 +140,14 @@ func TestQueryLessThan(t *testing.T) {
 	q := NewQuery().LessThan("fields.date", 10)
 	expected := url.Values{}
 	expected.Set("fields.date[lt]", "10")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	now := time.Now()
 	q = NewQuery().LessThan("fields.date", now)
 	expected = url.Values{}
 	expected.Set("fields.date[lt]", now.Format("2006-01-02 15:04:05"))
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -144,12 +155,14 @@ func TestQueryLessThanOrEqual(t *testing.T) {
 	q := NewQuery().LessThanOrEqual("fields.date", 10)
 	expected := url.Values{}
 	expected.Set("fields.date[lte]", "10")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	now := time.Now()
 	q = NewQuery().LessThanOrEqual("fields.date", now)
 	expected = url.Values{}
 	expected.Set("fields.date[lte]", now.Format("2006-01-02 15:04:05"))
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -157,12 +170,14 @@ func TestQueryGreaterThan(t *testing.T) {
 	q := NewQuery().GreaterThan("fields.date", 10)
 	expected := url.Values{}
 	expected.Set("fields.date[gt]", "10")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	now := time.Now()
 	q = NewQuery().GreaterThan("fields.date", now)
 	expected = url.Values{}
 	expected.Set("fields.date[gt]", now.Format("2006-01-02 15:04:05"))
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -170,12 +185,14 @@ func TestQueryGreaterThanOrEqual(t *testing.T) {
 	q := NewQuery().GreaterThanOrEqual("fields.date", 10)
 	expected := url.Values{}
 	expected.Set("fields.date[gte]", "10")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	now := time.Now()
 	q = NewQuery().GreaterThanOrEqual("fields.date", now)
 	expected = url.Values{}
 	expected.Set("fields.date[gte]", now.Format("2006-01-02 15:04:05"))
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -183,6 +200,7 @@ func TestQueryQuery(t *testing.T) {
 	q := NewQuery().Query("query_str")
 	expected := url.Values{}
 	expected.Set("query", "query_str")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -190,6 +208,7 @@ func TestQueryMatch(t *testing.T) {
 	q := NewQuery().Match("field1", "match_query")
 	expected := url.Values{}
 	expected.Set("field1[match]", "match_query")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -197,6 +216,7 @@ func TestQueryNear(t *testing.T) {
 	q := NewQuery().Near("field1", 38, -120)
 	expected := url.Values{}
 	expected.Set("field1[near]", "38,-120")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -204,6 +224,7 @@ func TestQueryWithin(t *testing.T) {
 	q := NewQuery().Within("field1", 38, -120, 10, 120)
 	expected := url.Values{}
 	expected.Set("field1[within]", "38,-120,10,120")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -211,6 +232,7 @@ func TestQueryWithinRadius(t *testing.T) {
 	q := NewQuery().WithinRadius("field1", 38, -120, 22)
 	expected := url.Values{}
 	expected.Set("field1[within]", "38,-120,22")
+	expected.Set("include", "0")
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
@@ -218,12 +240,14 @@ func TestQueryOrder(t *testing.T) {
 	q := NewQuery().ContentType("ct").Order("field1", false)
 	expected := url.Values{}
 	expected.Set("content_type", "ct")
+	expected.Set("include", "0")
 	expected.Set("order", "field1")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	q = NewQuery().ContentType("ct").Order("field1", true)
 	expected = url.Values{}
 	expected.Set("content_type", "ct")
+	expected.Set("include", "0")
 	expected.Set("order", "-field1")
 	assert.Equal(t, expected.Encode(), q.String())
 
@@ -235,6 +259,7 @@ func TestQueryOrder(t *testing.T) {
 
 	expected = url.Values{}
 	expected.Set("content_type", "ct")
+	expected.Set("include", "0")
 	expected.Set("order", "-field1,field2,field3")
 	assert.Equal(t, expected.Encode(), q.String())
 
@@ -247,18 +272,20 @@ func TestQueryOrder(t *testing.T) {
 func TestQueryLimit(t *testing.T) {
 	q := NewQuery().Limit(10)
 	expected := url.Values{}
+	expected.Set("include", "0")
 	expected.Set("limit", "10")
 	assert.Equal(t, expected.Encode(), q.String())
 
 	assert.Panics(t, func() {
 		q := NewQuery().Limit(3000)
-		q.String()
+		_ = q.String()
 	}, "out of range limit should panic")
 }
 
 func TestQuerySkip(t *testing.T) {
 	q := NewQuery().Skip(10)
 	expected := url.Values{}
+	expected.Set("include", "0")
 	expected.Set("skip", "10")
 	assert.Equal(t, expected.Encode(), q.String())
 }
@@ -266,6 +293,7 @@ func TestQuerySkip(t *testing.T) {
 func TestQueryMimeType(t *testing.T) {
 	q := NewQuery().MimeType("image")
 	expected := url.Values{}
+	expected.Set("include", "0")
 	expected.Set("mimetype_group", "image")
 	assert.Equal(t, expected.Encode(), q.String())
 }
@@ -281,6 +309,7 @@ func TestQuery(t *testing.T) {
 	expected := url.Values{}
 	expected.Set("cat.name", "catname")
 	expected.Set("cat.name[ne]", "dogname")
+	expected.Set("include", "0")
 	expected.Set("sys.id[in]", "test,test2")
 	expected.Set("sys.id[nin]", "test3")
 	expected.Set("fields.cat[lt]", "4")

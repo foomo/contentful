@@ -1,6 +1,7 @@
 package contentful
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,9 +10,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func ExampleEntryService_Upsert_create() {
+func ExampleEntriesService_Upsert_create() {
 	cma := NewCMA("cma-token")
 
 	entry := &Entry{
@@ -30,51 +32,50 @@ func ExampleEntryService_Upsert_create() {
 		},
 	}
 
-	err := cma.Entries.Upsert("space-id", entry)
+	err := cma.Entries.Upsert(context.TODO(), "space-id", entry)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
-func ExampleEntryService_Upsert_update() {
+func ExampleEntriesService_Upsert_update() {
 	cma := NewCMA("cma-token")
 
-	entry, err := cma.Entries.Get("space-id", "entry-id")
+	entry, err := cma.Entries.Get(context.TODO(), "space-id", "entry-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
 	entry.Fields["Description"] = map[string]interface{}{
 		"en-US": "modified entry content",
 	}
 
-	err = cma.Entries.Upsert("space-id", entry)
+	err = cma.Entries.Upsert(context.TODO(), "space-id", entry)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func TestEntrySaveForCreate(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/entries")
-		assert.Equal(r.Header["X-Contentful-Content-Type"], []string{"MyContentType"})
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/entries", r.RequestURI)
+		assert.Equal(t, []string{"MyContentType"}, r.Header["X-Contentful-Content-Type"])
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
+		require.NoError(t, err)
 
-		assert.NotNil(payload["fields"])
+		assert.NotNil(t, payload["fields"])
 		fields := payload["fields"].(map[string]interface{})
 
-		assert.Equal(fields["Description"], map[string]interface{}{"en-US": "Some test content..."})
+		assert.Equal(t, map[string]interface{}{"en-US": "Some test content..."}, fields["Description"])
 
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("entry_3.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "entry_3.json"))
 	})
 
 	// test server
@@ -100,50 +101,49 @@ func TestEntrySaveForCreate(t *testing.T) {
 		},
 	}
 
-	err = cma.Entries.Upsert("id1", entry)
-	assert.Nil(err)
-	assert.Equal("foocat", entry.Sys.ID)
+	err = cma.Entries.Upsert(context.TODO(), "id1", entry)
+	require.NoError(t, err)
+	assert.Equal(t, "foocat", entry.Sys.ID)
 }
 
-//func TestEntrySaveForUpdate(t *testing.T) {
+// func TestEntrySaveForUpdate(t *testing.T) {
 //	var err error
-//	assert := assert.New(t)
 //
 //	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//		assert.Equal(r.Method, "PUT")
-//		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6")
-//		checkHeaders(r, assert)
+//		assert.Equal(t, r.Method, "PUT")
+//		assert.Equal(t, r.RequestURI, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6")
+//		checkHeaders(t, r)
 //
 //		var payload map[string]interface{}
 //		err := json.NewDecoder(r.Body).Decode(&payload)
-//		assert.Nil(err)
-//		assert.Equal("ct-name-updated", payload["name"])
-//		assert.Equal("ct-description-updated", payload["description"])
+//		require.NoError(t, err)
+//		assert.Equal(t, "ct-name-updated", payload["name"])
+//		assert.Equal(t, "ct-description-updated", payload["description"])
 //
 //		fields := payload["fields"].([]interface{})
-//		assert.Equal(3, len(fields))
+//		assert.Equal(t, 3, len(fields))
 //
 //		field1 := fields[0].(map[string]interface{})
 //		field2 := fields[1].(map[string]interface{})
 //		field3 := fields[2].(map[string]interface{})
 //
-//		assert.Equal("field1", field1["id"].(string))
-//		assert.Equal("field1-name-updated", field1["name"].(string))
-//		assert.Equal("String", field1["type"].(string))
+//		assert.Equal(t, "field1", field1["id"].(string))
+//		assert.Equal(t, "field1-name-updated", field1["name"].(string))
+//		assert.Equal(t, "String", field1["type"].(string))
 //
-//		assert.Equal("field2", field2["id"].(string))
-//		assert.Equal("field2-name-updated", field2["name"].(string))
-//		assert.Equal("Integer", field2["type"].(string))
+//		assert.Equal(t, "field2", field2["id"].(string))
+//		assert.Equal(t, "field2-name-updated", field2["name"].(string))
+//		assert.Equal(t, "Integer", field2["type"].(string))
 //		assert.Nil(field2["disabled"])
 //
-//		assert.Equal("field3", field3["id"].(string))
-//		assert.Equal("field3-name", field3["name"].(string))
-//		assert.Equal("Date", field3["type"].(string))
+//		assert.Equal(t, "field3", field3["id"].(string))
+//		assert.Equal(t, "field3-name", field3["name"].(string))
+//		assert.Equal(t, "Date", field3["type"].(string))
 //
-//		assert.Equal(field3["id"].(string), payload["displayField"])
+//		assert.Equal(t, field3["id"].(string), payload["displayField"])
 //
 //		w.WriteHeader(200)
-//		fmt.Fprintln(w, string(readTestData("content_type-updated.json")))
+//		_, _ = fmt.Fprintln(w, readTestData(t, "content_type-updated.json"))
 //	})
 //
 //	// test server
@@ -155,8 +155,8 @@ func TestEntrySaveForCreate(t *testing.T) {
 //	cma.BaseURL = server.URL
 //
 //	// test content type
-//	ct, err := contentTypeFromTestData("content_type.json")
-//	assert.Nil(err)
+//	ct, err := contentTypeFromTestData(t, "content_type.json")
+//	require.NoError(t, err)
 //
 //	ct.Name = "ct-name-updated"
 //	ct.Description = "ct-description-updated"
@@ -181,24 +181,23 @@ func TestEntrySaveForCreate(t *testing.T) {
 //	ct.DisplayField = ct.Fields[2].ID
 //
 //	cma.ContentTypes.Upsert("id1", ct)
-//	assert.Nil(err)
-//	assert.Equal("63Vgs0BFK0USe4i2mQUGK6", ct.Sys.ID)
-//	assert.Equal("ct-name-updated", ct.Name)
-//	assert.Equal("ct-description-updated", ct.Description)
-//	assert.Equal(2, ct.Sys.Version)
-//}
+//	require.NoError(t, err)
+//	assert.Equal(t, "63Vgs0BFK0USe4i2mQUGK6", ct.Sys.ID)
+//	assert.Equal(t, "ct-name-updated", ct.Name)
+//	assert.Equal(t, "ct-description-updated", ct.Description)
+//	assert.Equal(t, 2, ct.Sys.Version)
+// }
 //
-//func TestEntryCreateWithoutID(t *testing.T) {
+// func TestEntryCreateWithoutID(t *testing.T) {
 //	var err error
-//	assert := assert.New(t)
 //
 //	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//		assert.Equal(r.Method, "POST")
-//		assert.Equal(r.RequestURI, "/spaces/id1/content_types")
-//		checkHeaders(r, assert)
+//		assert.Equal(t, http.MethodPost, r.Method)
+//		assert.Equal(t, "/spaces/id1/content_types", r.RequestURI)
+//		checkHeaders(t, r)
 //
 //		w.WriteHeader(200)
-//		fmt.Fprintln(w, string(readTestData("content_type-updated.json")))
+//		_, _ = fmt.Fprintln(w, readTestData(t, "content_type-updated.json"))
 //	})
 //
 //	// test server
@@ -216,20 +215,19 @@ func TestEntrySaveForCreate(t *testing.T) {
 //	}
 //
 //	cma.ContentTypes.Upsert("id1", ct)
-//	assert.Nil(err)
-//}
+//	require.NoError(t, err)
+// }
 //
-//func TestEntryCreateWithID(t *testing.T) {
+// func TestEntryCreateWithID(t *testing.T) {
 //	var err error
-//	assert := assert.New(t)
 //
 //	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//		assert.Equal(r.Method, "PUT")
-//		assert.Equal(r.RequestURI, "/spaces/id1/content_types/mycontenttype")
-//		checkHeaders(r, assert)
+//		assert.Equal(t, r.Method, "PUT")
+//		assert.Equal(t, r.RequestURI, "/spaces/id1/content_types/mycontenttype")
+//		checkHeaders(t, r)
 //
 //		w.WriteHeader(200)
-//		fmt.Fprintln(w, string(readTestData("content_type-updated.json")))
+//		_, _ = fmt.Fprintln(w, readTestData(t, "content_type-updated.json"))
 //	})
 //
 //	// test server
@@ -249,5 +247,5 @@ func TestEntrySaveForCreate(t *testing.T) {
 //	}
 //
 //	cma.ContentTypes.Upsert("id1", ct)
-//	assert.Nil(err)
-//}
+//	require.NoError(t, err)
+// }
