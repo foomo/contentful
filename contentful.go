@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 
-	"moul.io/http2curl"
+	"github.com/aoliveti/curling"
 )
 
 // Contentful model
@@ -178,8 +178,9 @@ func (c *Contentful) newRequest(ctx context.Context, method, path string, query 
 
 func (c *Contentful) do(req *http.Request, v interface{}) error {
 	if c.Debug {
-		command, _ := http2curl.GetCurlCommand(req)
-		fmt.Println(command)
+		if cmd, err := curling.NewFromRequest(req); err == nil {
+			fmt.Println(cmd)
+		}
 	}
 
 	res, err := c.client.Do(req)
@@ -228,11 +229,9 @@ func (c *Contentful) do(req *http.Request, v interface{}) error {
 
 func (c *Contentful) handleError(req *http.Request, res *http.Response) error {
 	if c.Debug {
-		dump, err := httputil.DumpResponse(res, true)
-		if err != nil {
-			return err
+		if dump, err := httputil.DumpResponse(res, true); err == nil {
+			fmt.Printf("%q", dump)
 		}
-		fmt.Printf("%q", dump)
 	}
 
 	var e ErrorResponse
