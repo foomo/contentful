@@ -1,0 +1,21 @@
+project_name: contentful
+
+release:
+  github:
+    owner: foomo
+    name: contentful
+  prerelease: auto
+
+builds:
+  - skip: true
+
+archives:
+  - format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+
+changelog:
+  use: github-native
