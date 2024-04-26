@@ -1,5 +1,5 @@
 # contentful-go
-[![Build Status](https://github.com/foomo/contentful/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/foomo/contentful/actions/workflows/test.yml)
+[![Build Status](https://github.com/foomo/contentful/actions/workflows/pr.yml/badge.svg?branch=main&event=push)](https://github.com/foomo/contentful/actions/workflows/pr.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/foomo/contentful)](https://goreportcard.com/report/github.com/foomo/contentful)
 [![Coverage Status](https://coveralls.io/repos/github/foomo/contentful/badge.svg?branch=main&)](https://coveralls.io/github/foomo/contentful?branch=main)
 [![GoDoc](https://godoc.org/github.com/foomo/contentful?status.svg)](https://godoc.org/github.com/foomo/contentful)
