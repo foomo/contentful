@@ -1,10 +1,8 @@
-[![codecov](https://codecov.io/gh/contentful-labs/contentful-go/branch/master/graph/badge.svg)](https://codecov.io/gh/contentful-labs/contentful-go)
-[![Godoc](https://img.shields.io/badge/godoc-Reference-brightgreen.svg?style=flat)](https://godoc.org/github.com/contentful-labs/contentful-go)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://travis-ci.com/contentful-labs/contentful-go.svg?token=ppF3HxXy28XU9AwHHiGX&branch=master)](https://travis-ci.com/contentful-labs/contentful-go)
-
-
 # contentful-go
+[![Build Status](https://github.com/foomo/contentful/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/foomo/contentful/actions/workflows/test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/foomo/contentful)](https://goreportcard.com/report/github.com/foomo/contentful)
+[![Coverage Status](https://coveralls.io/repos/github/foomo/contentful/badge.svg?branch=main&)](https://coveralls.io/github/foomo/contentful?branch=main)
+[![GoDoc](https://godoc.org/github.com/foomo/contentful?status.svg)](https://godoc.org/github.com/foomo/contentful)
 
 GoLang SDK for [Contentful's](https://www.contentful.com) Content Delivery, Preview and Management API's.
 
