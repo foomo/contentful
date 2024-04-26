@@ -80,11 +80,12 @@ func (col *Collection) Next() (*Collection, error) {
 	}
 
 	col.page++
+	r, _ := regexp.Compile("sync_token=([a-zA-Z0-9\\-\\_]+)")
 	if col.NextPageURL != "" {
-		syncToken := syncTokenRegex.FindStringSubmatch(col.NextPageURL)
+		syncToken := r.FindStringSubmatch(col.NextPageURL)
 		col.SyncToken = syncToken[1]
 	} else if col.NextSyncURL != "" {
-		syncToken := syncTokenRegex.FindStringSubmatch(col.NextSyncURL)
+		syncToken := r.FindStringSubmatch(col.NextSyncURL)
 		col.SyncToken = syncToken[1]
 	}
 	return col, nil
