@@ -2,8 +2,10 @@ package contentful
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 )
 
@@ -47,11 +49,11 @@ func (locale *Locale) GetVersion() int {
 }
 
 // List returns a locales collection
-func (service *LocalesService) List(spaceID string) *Collection {
+func (service *LocalesService) List(ctx context.Context, spaceID string) *Collection {
 	path := fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -64,11 +66,11 @@ func (service *LocalesService) List(spaceID string) *Collection {
 }
 
 // Get returns a single locale entity
-func (service *LocalesService) Get(spaceID, localeID string) (*Locale, error) {
+func (service *LocalesService) Get(ctx context.Context, spaceID, localeID string) (*Locale, error) {
 	path := fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), localeID)
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -82,11 +84,11 @@ func (service *LocalesService) Get(spaceID, localeID string) (*Locale, error) {
 }
 
 // Delete the locale
-func (service *LocalesService) Delete(spaceID string, locale *Locale) error {
+func (service *LocalesService) Delete(ctx context.Context, spaceID string, locale *Locale) error {
 	path := fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), locale.Sys.ID)
-	method := "DELETE"
+	method := http.MethodDelete
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -98,7 +100,7 @@ func (service *LocalesService) Delete(spaceID string, locale *Locale) error {
 }
 
 // Upsert updates or creates a new locale entity
-func (service *LocalesService) Upsert(spaceID string, locale *Locale) error {
+func (service *LocalesService) Upsert(ctx context.Context, spaceID string, locale *Locale) error {
 	bytesArray, err := json.Marshal(locale)
 	if err != nil {
 		return err
@@ -115,7 +117,7 @@ func (service *LocalesService) Upsert(spaceID string, locale *Locale) error {
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
 	if err != nil {
 		return err
 	}

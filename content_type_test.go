@@ -1,6 +1,7 @@
 package contentful
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,14 +10,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func ExampleContentTypesService_Get() {
 	cma := NewCMA("cma-token")
 
-	contentType, err := cma.ContentTypes.Get("space-id", "content-type-id")
+	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
 	fmt.Println(contentType.Name)
@@ -25,12 +27,15 @@ func ExampleContentTypesService_Get() {
 func ExampleContentTypesService_List() {
 	cma := NewCMA("cma-token")
 
-	collection, err := cma.ContentTypes.List("space-id").Next()
+	collection, err := cma.ContentTypes.List(context.TODO(), "space-id").Next()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	contentTypes := collection.ToContentType()
+	contentTypes, err := collection.ToContentType()
+	if err != nil {
+		log.Fatal(err) //nolint:revive
+	}
 
 	for _, contentType := range contentTypes {
 		fmt.Println(contentType.Sys.ID, contentType.Sys.PublishedAt)
@@ -45,14 +50,14 @@ func ExampleContentTypesService_Upsert_create() {
 		DisplayField: "field1_id",
 		Description:  "content type description",
 		Fields: []*Field{
-			&Field{
+			{
 				ID:       "field1_id",
 				Name:     "field1",
 				Type:     "Symbol",
 				Required: false,
 				Disabled: false,
 			},
-			&Field{
+			{
 				ID:       "field2_id",
 				Name:     "field2",
 				Type:     "Symbol",
@@ -62,85 +67,88 @@ func ExampleContentTypesService_Upsert_create() {
 		},
 	}
 
-	err := cma.ContentTypes.Upsert("space-id", contentType)
+	err := cma.ContentTypes.Upsert(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleContentTypesService_Upsert_update() {
 	cma := NewCMA("cma-token")
 
-	contentType, err := cma.ContentTypes.Get("space-id", "content-type-id")
+	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
 	contentType.Name = "modified content type name"
 
-	err = cma.ContentTypes.Upsert("space-id", contentType)
+	err = cma.ContentTypes.Upsert(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleContentTypesService_Activate() {
 	cma := NewCMA("cma-token")
 
-	contentType, err := cma.ContentTypes.Get("space-id", "content-type-id")
+	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	err = cma.ContentTypes.Activate("space-id", contentType)
+	err = cma.ContentTypes.Activate(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleContentTypesService_Deactivate() {
 	cma := NewCMA("cma-token")
 
-	contentType, err := cma.ContentTypes.Get("space-id", "content-type-id")
+	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	err = cma.ContentTypes.Deactivate("space-id", contentType)
+	err = cma.ContentTypes.Deactivate(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleContentTypesService_Delete() {
 	cma := NewCMA("cma-token")
 
-	contentType, err := cma.ContentTypes.Get("space-id", "content-type-id")
+	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	err = cma.ContentTypes.Delete("space-id", contentType)
+	err = cma.ContentTypes.Delete(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 }
 
 func ExampleContentTypesService_Delete_allDrafts() {
 	cma := NewCMA("cma-token")
 
-	collection, err := cma.ContentTypes.List("space-id").Next()
+	collection, err := cma.ContentTypes.List(context.TODO(), "space-id").Next()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:revive
 	}
 
-	contentTypes := collection.ToContentType()
+	contentTypes, err := collection.ToContentType()
+	if err != nil {
+		log.Fatal(err) //nolint:revive
+	}
 
 	for _, contentType := range contentTypes {
 		if contentType.Sys.PublishedAt == "" {
-			err := cma.ContentTypes.Delete("space-id", contentType)
+			err := cma.ContentTypes.Delete(context.TODO(), "space-id", contentType)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal(err) //nolint:revive
 			}
 		}
 	}
@@ -148,16 +156,15 @@ func ExampleContentTypesService_Delete_allDrafts() {
 
 func TestContentTypesServiceList(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "GET")
-		assert.Equal(r.URL.Path, "/spaces/"+spaceID+"/content_types")
+		assert.Equal(t, http.MethodGet, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types", r.URL.Path)
 
-		checkHeaders(r, assert)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, readTestData("content_types.json"))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_types.json"))
 	})
 
 	// test server
@@ -168,22 +175,21 @@ func TestContentTypesServiceList(t *testing.T) {
 	cma = NewCMA(CMAToken)
 	cma.BaseURL = server.URL
 
-	_, err = cma.ContentTypes.List(spaceID).Next()
-	assert.Nil(err)
+	_, err = cma.ContentTypes.List(context.TODO(), spaceID).Next()
+	require.NoError(t, err)
 }
 
 func TestContentTypesServiceActivate(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "PUT")
-		assert.Equal(r.URL.Path, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6/published")
+		assert.Equal(t, http.MethodPut, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6/published", r.URL.Path)
 
-		checkHeaders(r, assert)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, readTestData("content_type.json"))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
 	})
 
 	// test server
@@ -195,25 +201,24 @@ func TestContentTypesServiceActivate(t *testing.T) {
 	cma.BaseURL = server.URL
 
 	// test content type
-	ct, err := contentTypeFromTestData("content_type.json")
-	assert.Nil(err)
+	ct, err := contentTypeFromTestData(t, "content_type.json")
+	require.NoError(t, err)
 
-	err = cma.ContentTypes.Activate(spaceID, ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Activate(context.TODO(), spaceID, ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypesServiceDeactivate(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "DELETE")
-		assert.Equal(r.URL.Path, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6/published")
+		assert.Equal(t, http.MethodDelete, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6/published", r.URL.Path)
 
-		checkHeaders(r, assert)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, readTestData("content_type.json"))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
 	})
 
 	// test server
@@ -225,47 +230,46 @@ func TestContentTypesServiceDeactivate(t *testing.T) {
 	cma.BaseURL = server.URL
 
 	// test content type
-	ct, err := contentTypeFromTestData("content_type.json")
-	assert.Nil(err)
+	ct, err := contentTypeFromTestData(t, "content_type.json")
+	require.NoError(t, err)
 
-	err = cma.ContentTypes.Deactivate(spaceID, ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Deactivate(context.TODO(), spaceID, ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeSaveForCreate(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
-		assert.Equal("ct-name", payload["name"])
-		assert.Equal("ct-description", payload["description"])
+		require.NoError(t, err)
+		assert.Equal(t, "ct-name", payload["name"])
+		assert.Equal(t, "ct-description", payload["description"])
 
 		fields := payload["fields"].([]interface{})
-		assert.Equal(2, len(fields))
+		assert.Len(t, fields, 2)
 
 		field1 := fields[0].(map[string]interface{})
 		field2 := fields[1].(map[string]interface{})
 
-		assert.Equal("field1", field1["id"].(string))
-		assert.Equal("field1-name", field1["name"].(string))
-		assert.Equal("Symbol", field1["type"].(string))
+		assert.Equal(t, "field1", field1["id"].(string))
+		assert.Equal(t, "field1-name", field1["name"].(string))
+		assert.Equal(t, "Symbol", field1["type"].(string))
 
-		assert.Equal("field2", field2["id"].(string))
-		assert.Equal("field2-name", field2["name"].(string))
-		assert.Equal("Symbol", field2["type"].(string))
-		assert.Equal(true, field2["disabled"].(bool))
+		assert.Equal(t, "field2", field2["id"].(string))
+		assert.Equal(t, "field2-name", field2["name"].(string))
+		assert.Equal(t, "Symbol", field2["type"].(string))
+		assert.True(t, field2["disabled"].(bool))
 
-		assert.Equal(field1["id"].(string), payload["displayField"])
+		assert.Equal(t, field1["id"].(string), payload["displayField"])
 
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("content_type.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
 	})
 
 	// test server
@@ -297,52 +301,51 @@ func TestContentTypeSaveForCreate(t *testing.T) {
 		DisplayField: field1.ID,
 	}
 
-	err = cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
-	assert.Equal("63Vgs0BFK0USe4i2mQUGK6", ct.Sys.ID)
-	assert.Equal("ct-name", ct.Name)
-	assert.Equal("ct-description", ct.Description)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
+	assert.Equal(t, "63Vgs0BFK0USe4i2mQUGK6", ct.Sys.ID)
+	assert.Equal(t, "ct-name", ct.Name)
+	assert.Equal(t, "ct-description", ct.Description)
 }
 
 func TestContentTypeSaveForUpdate(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "PUT")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPut, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
-		assert.Equal("ct-name-updated", payload["name"])
-		assert.Equal("ct-description-updated", payload["description"])
+		require.NoError(t, err)
+		assert.Equal(t, "ct-name-updated", payload["name"])
+		assert.Equal(t, "ct-description-updated", payload["description"])
 
 		fields := payload["fields"].([]interface{})
-		assert.Equal(3, len(fields))
+		assert.Len(t, fields, 3)
 
 		field1 := fields[0].(map[string]interface{})
 		field2 := fields[1].(map[string]interface{})
 		field3 := fields[2].(map[string]interface{})
 
-		assert.Equal("field1", field1["id"].(string))
-		assert.Equal("field1-name-updated", field1["name"].(string))
-		assert.Equal("String", field1["type"].(string))
+		assert.Equal(t, "field1", field1["id"].(string))
+		assert.Equal(t, "field1-name-updated", field1["name"].(string))
+		assert.Equal(t, "String", field1["type"].(string))
 
-		assert.Equal("field2", field2["id"].(string))
-		assert.Equal("field2-name-updated", field2["name"].(string))
-		assert.Equal("Integer", field2["type"].(string))
-		assert.Nil(field2["disabled"])
+		assert.Equal(t, "field2", field2["id"].(string))
+		assert.Equal(t, "field2-name-updated", field2["name"].(string))
+		assert.Equal(t, "Integer", field2["type"].(string))
+		assert.Nil(t, field2["disabled"])
 
-		assert.Equal("field3", field3["id"].(string))
-		assert.Equal("field3-name", field3["name"].(string))
-		assert.Equal("Date", field3["type"].(string))
+		assert.Equal(t, "field3", field3["id"].(string))
+		assert.Equal(t, "field3-name", field3["name"].(string))
+		assert.Equal(t, "Date", field3["type"].(string))
 
-		assert.Equal(field3["id"].(string), payload["displayField"])
+		assert.Equal(t, field3["id"].(string), payload["displayField"])
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, string(readTestData("content_type-updated.json")))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type-updated.json"))
 	})
 
 	// test server
@@ -354,8 +357,8 @@ func TestContentTypeSaveForUpdate(t *testing.T) {
 	cma.BaseURL = server.URL
 
 	// test content type
-	ct, err := contentTypeFromTestData("content_type.json")
-	assert.Nil(err)
+	ct, err := contentTypeFromTestData(t, "content_type.json")
+	require.NoError(t, err)
 
 	ct.Name = "ct-name-updated"
 	ct.Description = "ct-description-updated"
@@ -379,25 +382,24 @@ func TestContentTypeSaveForUpdate(t *testing.T) {
 	ct.Fields = append(ct.Fields, field3)
 	ct.DisplayField = ct.Fields[2].ID
 
-	cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
-	assert.Equal("63Vgs0BFK0USe4i2mQUGK6", ct.Sys.ID)
-	assert.Equal("ct-name-updated", ct.Name)
-	assert.Equal("ct-description-updated", ct.Description)
-	assert.Equal(2, ct.Sys.Version)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
+	assert.Equal(t, "63Vgs0BFK0USe4i2mQUGK6", ct.Sys.ID)
+	assert.Equal(t, "ct-name-updated", ct.Name)
+	assert.Equal(t, "ct-description-updated", ct.Description)
+	assert.Equal(t, 2, ct.Sys.Version)
 }
 
 func TestContentTypeCreateWithoutID(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces/id1/content_types")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces/id1/content_types", r.RequestURI)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, string(readTestData("content_type-updated.json")))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type-updated.json"))
 	})
 
 	// test server
@@ -414,21 +416,20 @@ func TestContentTypeCreateWithoutID(t *testing.T) {
 		Name: "MyContentType",
 	}
 
-	cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeCreateWithID(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "PUT")
-		assert.Equal(r.RequestURI, "/spaces/id1/content_types/mycontenttype")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPut, r.Method)
+		assert.Equal(t, "/spaces/id1/content_types/mycontenttype", r.RequestURI)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
-		fmt.Fprintln(w, string(readTestData("content_type-updated.json")))
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type-updated.json"))
 	})
 
 	// test server
@@ -447,20 +448,19 @@ func TestContentTypeCreateWithID(t *testing.T) {
 		Name: "MyContentType",
 	}
 
-	cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeDelete(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "DELETE")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodDelete, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types/63Vgs0BFK0USe4i2mQUGK6", r.RequestURI)
+		checkHeaders(t, r)
 
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	})
 
 	// test server
@@ -472,41 +472,40 @@ func TestContentTypeDelete(t *testing.T) {
 	cma.BaseURL = server.URL
 
 	// test content type
-	ct, err := contentTypeFromTestData("content_type.json")
-	assert.Nil(err)
+	ct, err := contentTypeFromTestData(t, "content_type.json")
+	require.NoError(t, err)
 
 	// delete content type
-	err = cma.ContentTypes.Delete("id1", ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Delete(context.TODO(), "id1", ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeFieldRef(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
+		require.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
-		assert.Equal(1, len(fields))
+		assert.Len(t, fields, 1)
 
 		field1 := fields[0].(map[string]interface{})
-		assert.Equal("Link", field1["type"].(string))
+		assert.Equal(t, "Link", field1["type"].(string))
 		validations := field1["validations"].([]interface{})
-		assert.Equal(1, len(validations))
+		assert.Len(t, validations, 1)
 		validation := validations[0].(map[string]interface{})
 		linkValidationValue := validation["linkContentType"].([]interface{})
-		assert.Equal(1, len(linkValidationValue))
-		assert.Equal("63Vgs0BFK0USe4i2mQUGK6", linkValidationValue[0].(string))
+		assert.Len(t, linkValidationValue, 1)
+		assert.Equal(t, "63Vgs0BFK0USe4i2mQUGK6", linkValidationValue[0].(string))
 
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("content_type.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
 	})
 
 	// test server
@@ -518,8 +517,8 @@ func TestContentTypeFieldRef(t *testing.T) {
 	cma.BaseURL = server.URL
 
 	// test content type
-	linkCt, err := contentTypeFromTestData("content_type.json")
-	assert.Nil(err)
+	linkCt, err := contentTypeFromTestData(t, "content_type.json")
+	require.NoError(t, err)
 
 	field1 := &Field{
 		ID:   "field1",
@@ -539,38 +538,37 @@ func TestContentTypeFieldRef(t *testing.T) {
 		DisplayField: field1.ID,
 	}
 
-	err = cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeFieldArray(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
+		require.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
-		assert.Equal(1, len(fields))
+		assert.Len(t, fields, 1)
 
 		field1 := fields[0].(map[string]interface{})
-		assert.Equal("Array", field1["type"].(string))
+		assert.Equal(t, "Array", field1["type"].(string))
 
 		arrayItemSchema := field1["items"].(map[string]interface{})
-		assert.Equal("Text", arrayItemSchema["type"].(string))
+		assert.Equal(t, "Text", arrayItemSchema["type"].(string))
 
 		arrayItemSchemaValidations := arrayItemSchema["validations"].([]interface{})
 		validation1 := arrayItemSchemaValidations[0].(map[string]interface{})
-		assert.Equal(true, validation1["unique"].(bool))
+		assert.True(t, validation1["unique"].(bool))
 
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("content_type.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
 	})
 
 	// test server
@@ -602,54 +600,53 @@ func TestContentTypeFieldArray(t *testing.T) {
 		DisplayField: field1.ID,
 	}
 
-	err = cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeFieldValidationRangeUniquePredefinedValues(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
+		require.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
-		assert.Equal(1, len(fields))
+		assert.Len(t, fields, 1)
 
 		field1 := fields[0].(map[string]interface{})
-		assert.Equal("Integer", field1["type"].(string))
+		assert.Equal(t, "Integer", field1["type"].(string))
 
 		validations := field1["validations"].([]interface{})
 
 		// unique validation
 		validationUnique := validations[0].(map[string]interface{})
-		assert.Equal(false, validationUnique["unique"].(bool))
+		assert.False(t, validationUnique["unique"].(bool))
 
 		// range validation
 		validationRange := validations[1].(map[string]interface{})
 		rangeValues := validationRange["range"].(map[string]interface{})
 		errorMessage := validationRange["message"].(string)
-		assert.Equal("error message", errorMessage)
-		assert.Equal(float64(20), rangeValues["min"].(float64))
-		assert.Equal(float64(30), rangeValues["max"].(float64))
+		assert.Equal(t, "error message", errorMessage)
+		assert.Equal(t, float64(20), rangeValues["min"].(float64))
+		assert.Equal(t, float64(30), rangeValues["max"].(float64))
 
 		// predefined validation
 		validationPredefinedValues := validations[2].(map[string]interface{})
 		predefinedValues := validationPredefinedValues["in"].([]interface{})
-		assert.Equal(3, len(predefinedValues))
-		assert.Equal("error message 2", validationPredefinedValues["message"].(string))
-		assert.Equal(float64(20), predefinedValues[0].(float64))
-		assert.Equal(float64(21), predefinedValues[1].(float64))
-		assert.Equal(float64(22), predefinedValues[2].(float64))
+		assert.Len(t, predefinedValues, 3)
+		assert.Equal(t, "error message 2", validationPredefinedValues["message"].(string))
+		assert.Equal(t, float64(20), predefinedValues[0].(float64))
+		assert.Equal(t, float64(21), predefinedValues[1].(float64))
+		assert.Equal(t, float64(22), predefinedValues[2].(float64))
 
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("content_type.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
 	})
 
 	// test server
@@ -689,41 +686,40 @@ func TestContentTypeFieldValidationRangeUniquePredefinedValues(t *testing.T) {
 		DisplayField: field1.ID,
 	}
 
-	err = cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeFieldTypeMedia(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(r.Method, "POST")
-		assert.Equal(r.RequestURI, "/spaces/"+spaceID+"/content_types")
-		checkHeaders(r, assert)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/spaces/"+spaceID+"/content_types", r.RequestURI)
+		checkHeaders(t, r)
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		assert.Nil(err)
+		require.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
-		assert.Equal(1, len(fields))
+		assert.Len(t, fields, 1)
 
 		field1 := fields[0].(map[string]interface{})
-		assert.Equal("Link", field1["type"].(string))
-		assert.Equal("Asset", field1["linkType"].(string))
+		assert.Equal(t, "Link", field1["type"].(string))
+		assert.Equal(t, "Asset", field1["linkType"].(string))
 
 		validations := field1["validations"].([]interface{})
 
 		// mime type validation
 		validationMimeType := validations[0].(map[string]interface{})
 		linkMimetypeGroup := validationMimeType["linkMimetypeGroup"].([]interface{})
-		assert.Equal(12, len(linkMimetypeGroup))
-		mimetypes := []string{}
+		assert.Len(t, linkMimetypeGroup, 12)
+		var mimetypes []string
 		for _, mimetype := range linkMimetypeGroup {
 			mimetypes = append(mimetypes, mimetype.(string))
 		}
-		assert.Equal(mimetypes, []string{
+		assert.Equal(t, []string{
 			MimeTypeAttachment,
 			MimeTypePlainText,
 			MimeTypeImage,
@@ -736,7 +732,7 @@ func TestContentTypeFieldTypeMedia(t *testing.T) {
 			MimeTypeArchive,
 			MimeTypeCode,
 			MimeTypeMarkup,
-		})
+		}, mimetypes)
 
 		// dimension validation
 		validationDimension := validations[1].(map[string]interface{})
@@ -748,25 +744,25 @@ func TestContentTypeFieldTypeMedia(t *testing.T) {
 		heightMax := int(heightData["max"].(float64))
 
 		_, ok := widthData["max"].(float64)
-		assert.False(ok)
+		assert.False(t, ok)
 
 		_, ok = heightData["min"].(float64)
-		assert.False(ok)
+		assert.False(t, ok)
 
-		assert.Equal("custom error message", errorMessage)
-		assert.Equal(100, widthMin)
-		assert.Equal(300, heightMax)
+		assert.Equal(t, "custom error message", errorMessage)
+		assert.Equal(t, 100, widthMin)
+		assert.Equal(t, 300, heightMax)
 
 		// size validation
 		validationSize := validations[2].(map[string]interface{})
 		sizeData := validationSize["assetFileSize"].(map[string]interface{})
 		min := int(sizeData["min"].(float64))
 		max := int(sizeData["max"].(float64))
-		assert.Equal(30, min)
-		assert.Equal(400, max)
+		assert.Equal(t, 30, min)
+		assert.Equal(t, 400, max)
 
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("content_type.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
 	})
 
 	// test server
@@ -824,17 +820,16 @@ func TestContentTypeFieldTypeMedia(t *testing.T) {
 		DisplayField: field1.ID,
 	}
 
-	err = cma.ContentTypes.Upsert("id1", ct)
-	assert.Nil(err)
+	err = cma.ContentTypes.Upsert(context.TODO(), "id1", ct)
+	require.NoError(t, err)
 }
 
 func TestContentTypeFieldValidationsUnmarshal(t *testing.T) {
 	var err error
-	assert := assert.New(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(201)
-		fmt.Fprintln(w, string(readTestData("content_type_with_validations.json")))
+		w.WriteHeader(http.StatusCreated)
+		_, _ = fmt.Fprintln(w, readTestData(t, "content_type_with_validations.json"))
 	})
 
 	server := httptest.NewServer(handler)
@@ -843,8 +838,8 @@ func TestContentTypeFieldValidationsUnmarshal(t *testing.T) {
 	cma = NewCMA(CMAToken)
 	cma.BaseURL = server.URL
 
-	ct, err := cma.ContentTypes.Get(spaceID, "validationsTest")
-	assert.Nil(err)
+	ct, err := cma.ContentTypes.Get(context.TODO(), spaceID, "validationsTest")
+	require.NoError(t, err)
 
 	uniqueValidations := []FieldValidation{}
 	linkValidations := []FieldValidation{}
@@ -859,7 +854,7 @@ func TestContentTypeFieldValidationsUnmarshal(t *testing.T) {
 
 	for _, field := range ct.Fields {
 		if field.Name == "text-short" {
-			assert.Equal(4, len(field.Validations))
+			assert.Len(t, field.Validations, 4)
 			uniqueValidations = append(uniqueValidations, field.Validations[0])
 			sizeValidations = append(sizeValidations, field.Validations[1])
 			regexValidations = append(regexValidations, field.Validations[2])
@@ -867,38 +862,38 @@ func TestContentTypeFieldValidationsUnmarshal(t *testing.T) {
 		}
 
 		if field.Name == "text-long" {
-			assert.Equal(3, len(field.Validations))
+			assert.Len(t, field.Validations, 3)
 			sizeValidations = append(sizeValidations, field.Validations[0])
 			regexValidations = append(regexValidations, field.Validations[1])
 			preDefinedValidations = append(preDefinedValidations, field.Validations[2])
 		}
 
 		if field.Name == "number-integer" || field.Name == "number-decimal" {
-			assert.Equal(3, len(field.Validations))
+			assert.Len(t, field.Validations, 3)
 			uniqueValidations = append(uniqueValidations, field.Validations[0])
 			rangeValidations = append(rangeValidations, field.Validations[1])
 			preDefinedValidations = append(preDefinedValidations, field.Validations[2])
 		}
 
 		if field.Name == "date" {
-			assert.Equal(1, len(field.Validations))
+			assert.Len(t, field.Validations, 1)
 			dateValidations = append(dateValidations, field.Validations[0])
 		}
 
 		if field.Name == "location" || field.Name == "bool" {
-			assert.Equal(0, len(field.Validations))
+			assert.Empty(t, field.Validations)
 		}
 
 		if field.Name == "media-onefile" {
-			assert.Equal(3, len(field.Validations))
+			assert.Len(t, field.Validations, 3)
 			mimeTypeValidations = append(mimeTypeValidations, field.Validations[0])
 			dimensionValidations = append(dimensionValidations, field.Validations[1])
 			fileSizeValidations = append(fileSizeValidations, field.Validations[2])
 		}
 
 		if field.Name == "media-manyfiles" {
-			assert.Equal(1, len(field.Validations))
-			assert.Equal(3, len(field.Items.Validations))
+			assert.Len(t, field.Validations, 1)
+			assert.Len(t, field.Items.Validations, 3)
 			sizeValidations = append(sizeValidations, field.Validations[0])
 			mimeTypeValidations = append(mimeTypeValidations, field.Items.Validations[0])
 			dimensionValidations = append(dimensionValidations, field.Items.Validations[1])
@@ -906,18 +901,18 @@ func TestContentTypeFieldValidationsUnmarshal(t *testing.T) {
 		}
 
 		if field.Name == "json" {
-			assert.Equal(1, len(field.Validations))
+			assert.Len(t, field.Validations, 1)
 			sizeValidations = append(sizeValidations, field.Validations[0])
 		}
 
 		if field.Name == "ref-onref" {
-			assert.Equal(1, len(field.Validations))
+			assert.Len(t, field.Validations, 1)
 			linkValidations = append(linkValidations, field.Validations[0])
 		}
 
 		if field.Name == "ref-manyRefs" {
-			assert.Equal(1, len(field.Validations))
-			assert.Equal(1, len(field.Items.Validations))
+			assert.Len(t, field.Validations, 1)
+			assert.Len(t, field.Items.Validations, 1)
 			linkValidations = append(linkValidations, field.Items.Validations[0])
 			sizeValidations = append(sizeValidations, field.Validations[0])
 		}
@@ -925,51 +920,51 @@ func TestContentTypeFieldValidationsUnmarshal(t *testing.T) {
 
 	for _, validation := range uniqueValidations {
 		_, ok := validation.(FieldValidationUnique)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range linkValidations {
 		_, ok := validation.(FieldValidationLink)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range sizeValidations {
 		_, ok := validation.(FieldValidationSize)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range regexValidations {
 		_, ok := validation.(FieldValidationRegex)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range preDefinedValidations {
 		_, ok := validation.(FieldValidationPredefinedValues)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range rangeValidations {
 		_, ok := validation.(FieldValidationRange)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range dateValidations {
 		_, ok := validation.(FieldValidationDate)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range mimeTypeValidations {
 		_, ok := validation.(FieldValidationMimeType)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range dimensionValidations {
 		_, ok := validation.(FieldValidationDimension)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 
 	for _, validation := range fileSizeValidations {
 		_, ok := validation.(FieldValidationFileSize)
-		assert.True(ok)
+		assert.True(t, ok)
 	}
 }

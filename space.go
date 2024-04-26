@@ -2,8 +2,10 @@ package contentful
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 )
 
@@ -39,8 +41,8 @@ func (space *Space) GetVersion() int {
 }
 
 // List creates a spaces collection
-func (service *SpacesService) List() *Collection {
-	req, _ := service.c.newRequest("GET", "/spaces", nil, nil)
+func (service *SpacesService) List(ctx context.Context) *Collection {
+	req, _ := service.c.newRequest(ctx, http.MethodGet, "/spaces", nil, nil)
 
 	col := NewCollection(&CollectionOptions{})
 	col.c = service.c
@@ -50,11 +52,11 @@ func (service *SpacesService) List() *Collection {
 }
 
 // Get returns a single space entity
-func (service *SpacesService) Get(spaceID string) (*Space, error) {
+func (service *SpacesService) Get(ctx context.Context, spaceID string) (*Space, error) {
 	path := fmt.Sprintf("/spaces/%s", spaceID)
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return &Space{}, err
 	}
@@ -68,7 +70,7 @@ func (service *SpacesService) Get(spaceID string) (*Space, error) {
 }
 
 // Upsert updates or creates a new space
-func (service *SpacesService) Upsert(space *Space) error {
+func (service *SpacesService) Upsert(ctx context.Context, space *Space) error {
 	bytesArray, err := json.Marshal(space)
 	if err != nil {
 		return err
@@ -85,7 +87,7 @@ func (service *SpacesService) Upsert(space *Space) error {
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
 	if err != nil {
 		return err
 	}
@@ -96,11 +98,11 @@ func (service *SpacesService) Upsert(space *Space) error {
 }
 
 // Delete the given space
-func (service *SpacesService) Delete(space *Space) error {
+func (service *SpacesService) Delete(ctx context.Context, space *Space) error {
 	path := fmt.Sprintf("/spaces/%s", space.Sys.ID)
-	method := "DELETE"
+	method := http.MethodDelete
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}

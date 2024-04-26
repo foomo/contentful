@@ -1,17 +1,18 @@
 package contentful
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"time"
 
-	"moul.io/http2curl"
+	"github.com/aoliveti/curling"
 )
 
 // Contentful model
@@ -25,26 +26,24 @@ type Contentful struct {
 	BaseURL     string
 	Environment string
 
-	Spaces       		 *SpacesService
-	APIKeys      		 *APIKeyService
-	Assets       		 *AssetsService
-	ContentTypes 		 *ContentTypesService
-	Entries      		 *EntriesService
-	Locales      		 *LocalesService
-	Webhooks     		 *WebhooksService
-	ScheduledActions     *ScheduledActionsService
+	Spaces       *SpacesService
+	APIKeys      *APIKeyService
+	Assets       *AssetsService
+	ContentTypes *ContentTypesService
+	Entries      *EntriesService
+	Locales      *LocalesService
+	Webhooks     *WebhooksService
 }
 
 type service struct {
 	c *Contentful
 }
 
-func getEnvPath(c *Contentful) (envPath string) {
+func getEnvPath(c *Contentful) string {
 	if c.Environment != "" {
-		envPath = fmt.Sprintf("/environments/%s", c.Environment)
-		return
+		return fmt.Sprintf("/environments/%s", c.Environment)
 	}
-	return
+	return ""
 }
 
 // NewCMA returns a CMA client
@@ -69,7 +68,6 @@ func NewCMA(token string) *Contentful {
 	c.Entries = &EntriesService{c: c}
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
-	c.ScheduledActions = &ScheduledActionsService{c: c}
 
 	return c
 }
@@ -146,12 +144,12 @@ func (c *Contentful) SetHTTPTransport(t http.RoundTripper) *Contentful {
 }
 
 // SetBaseURL provides an option to change the BaseURL of the client
-func (c *Contentful) SetBaseURL(url string) *Contentful {
-	c.BaseURL = url
+func (c *Contentful) SetBaseURL(baseURL string) *Contentful {
+	c.BaseURL = baseURL
 	return c
 }
 
-func (c *Contentful) newRequest(method, path string, query url.Values, body io.Reader) (*http.Request, error) {
+func (c *Contentful) newRequest(ctx context.Context, method, path string, query url.Values, body io.Reader) (*http.Request, error) {
 	u, err := url.Parse(c.BaseURL)
 	if err != nil {
 		return nil, err
@@ -165,7 +163,7 @@ func (c *Contentful) newRequest(method, path string, query url.Values, body io.R
 	u.Path = u.Path + path
 	u.RawQuery = query.Encode()
 
-	req, err := http.NewRequest(method, u.String(), body)
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -179,9 +177,10 @@ func (c *Contentful) newRequest(method, path string, query url.Values, body io.R
 }
 
 func (c *Contentful) do(req *http.Request, v interface{}) error {
-	if c.Debug == true {
-		command, _ := http2curl.GetCurlCommand(req)
-		fmt.Println(command)
+	if c.Debug {
+		if cmd, err := curling.NewFromRequest(req); err == nil {
+			fmt.Println(cmd)
+		}
 	}
 
 	res, err := c.client.Do(req)
@@ -205,7 +204,8 @@ func (c *Contentful) do(req *http.Request, v interface{}) error {
 	apiError := c.handleError(req, res)
 
 	// return apiError if it is not rate limit error
-	if _, ok := apiError.(RateLimitExceededError); !ok {
+	var rateLimitExceededError RateLimitExceededError
+	if !errors.As(apiError, &rateLimitExceededError) {
 		return apiError
 	}
 
@@ -228,13 +228,10 @@ func (c *Contentful) do(req *http.Request, v interface{}) error {
 }
 
 func (c *Contentful) handleError(req *http.Request, res *http.Response) error {
-	if c.Debug == true {
-		dump, err := httputil.DumpResponse(res, true)
-		if err != nil {
-			log.Fatal(err)
+	if c.Debug {
+		if dump, err := httputil.DumpResponse(res, true); err == nil {
+			fmt.Printf("%q", dump)
 		}
-
-		fmt.Printf("%q", dump)
 	}
 
 	var e ErrorResponse

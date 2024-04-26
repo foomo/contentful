@@ -1,26 +1,75 @@
-GO_CMD=go
-GO_BUILD=$(GO_CMD) build
-GO_BUILD_RACE=$(GO_CMD) build -race
-GO_TEST=$(GO_CMD) test
-GO_TEST_VERBOSE=$(GO_CMD) test -v
-GO_INSTALL=$(GO_CMD) install -v
-GO_CLEAN=$(GO_CMD) clean
-GO_DEPS=$(GO_CMD) get -d -v
-GO_DEPS_UPDATE=$(GO_CMD) get -d -v -u
-GO_VET=$(GO_CMD) vet
-GO_FMT=$(GO_CMD) fmt
+.DEFAULT_GOAL:=help
+-include .makerc
 
-.PHONY: all test lint dep
+# --- Targets -----------------------------------------------------------------
 
-all: dep test lint
+# This allows us to accept extra arguments
+%:
+	@:
 
+## === Tasks ===
+
+.PHONY: doc
+## Run tests
+doc:
+	@open "http://localhost:6060/pkg/github.com/foomo/contentful/"
+	@godoc -http=localhost:6060 -play
+
+.PHONY: test
+## Run tests
 test:
-	./tools/test.sh
+	@go test -p 1 -coverprofile=coverage.out -race -json ./... | gotestfmt
 
+.PHONY: lint
+## Run linter
 lint:
-	./tools/lint.sh
+	@golangci-lint run
 
-dep:
-	curl -fsSL -o /tmp/dep https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64
-	chmod +x /tmp/dep
-	/tmp/dep ensure -vendor-only
+.PHONY: lint.fix
+## Fix lint violations
+lint.fix:
+	@golangci-lint run --fix
+
+.PHONY: tidy
+## Run go mod tidy
+tidy:
+	@go mod tidy
+
+.PHONY: outdated
+## Show outdated direct dependencies
+outdated:
+	@go list -u -m -json all | go-mod-outdated -update -direct
+
+## === Utils ===
+
+## Show help text
+help:
+	@awk '{ \
+			if ($$0 ~ /^.PHONY: [a-zA-Z\-\_0-9]+$$/) { \
+				helpCommand = substr($$0, index($$0, ":") + 2); \
+				if (helpMessage) { \
+					printf "\033[36m%-23s\033[0m %s\n", \
+						helpCommand, helpMessage; \
+					helpMessage = ""; \
+				} \
+			} else if ($$0 ~ /^[a-zA-Z\-\_0-9.]+:/) { \
+				helpCommand = substr($$0, 0, index($$0, ":")); \
+				if (helpMessage) { \
+					printf "\033[36m%-23s\033[0m %s\n", \
+						helpCommand, helpMessage"\n"; \
+					helpMessage = ""; \
+				} \
+			} else if ($$0 ~ /^##/) { \
+				if (helpMessage) { \
+					helpMessage = helpMessage"\n                        "substr($$0, 3); \
+				} else { \
+					helpMessage = substr($$0, 3); \
+				} \
+			} else { \
+				if (helpMessage) { \
+					print "\n                        "helpMessage"\n" \
+				} \
+				helpMessage = ""; \
+			} \
+		}' \
+		$(MAKEFILE_LIST)

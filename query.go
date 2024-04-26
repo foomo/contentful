@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-//Query model
+// Query model
 type Query struct {
 	include     uint16
 	contentType string
@@ -39,7 +39,7 @@ type Query struct {
 	sysID       string
 }
 
-//NewQuery initilazies a new query
+// NewQuery initilazies a new query
 func NewQuery() *Query {
 	return &Query{
 		include:     0,
@@ -72,127 +72,127 @@ func NewQuery() *Query {
 	}
 }
 
-//SysID query
+// SysID query
 func (q *Query) SysID(sid string) *Query {
 	q.sysID = sid
 	return q
 }
 
-//Include query
+// Include query
 func (q *Query) Include(include uint16) *Query {
 	q.include = include
 	return q
 }
 
-//ContentType query
+// ContentType query
 func (q *Query) ContentType(ct string) *Query {
 	q.contentType = ct
 	return q
 }
 
-//Select query
+// Select query
 func (q *Query) Select(fields []string) *Query {
 	q.fields = fields
 	return q
 }
 
-//Equal equality query
+// Equal equality query
 func (q *Query) Equal(field string, value interface{}) *Query {
 	q.e[field] = value
 	return q
 }
 
-//NotEqual [ne] query
+// NotEqual [ne] query
 func (q *Query) NotEqual(field string, value interface{}) *Query {
 	q.ne[field] = value
 	return q
 }
 
-//All [all] query
+// All [all] query
 func (q *Query) All(field string, value []string) *Query {
 	q.all[field] = value
 	return q
 }
 
-//In [in] query
+// In [in] query
 func (q *Query) In(field string, value []string) *Query {
 	q.in[field] = value
 	return q
 }
 
-//NotIn [nin] query
+// NotIn [nin] query
 func (q *Query) NotIn(field string, value []string) *Query {
 	q.nin[field] = value
 	return q
 }
 
-//Exists [exists] query
+// Exists [exists] query
 func (q *Query) Exists(field string) *Query {
 	q.exists = append(q.exists, field)
 	return q
 }
 
-//NotExists [exists] query
+// NotExists [exists] query
 func (q *Query) NotExists(field string) *Query {
 	q.notExists = append(q.notExists, field)
 	return q
 }
 
-//LessThan [lt] query
+// LessThan [lt] query
 func (q *Query) LessThan(field string, value interface{}) *Query {
 	q.lt[field] = value
 	return q
 }
 
-//LessThanOrEqual [lte] query
+// LessThanOrEqual [lte] query
 func (q *Query) LessThanOrEqual(field string, value interface{}) *Query {
 	q.lte[field] = value
 	return q
 }
 
-//GreaterThan [gt] query
+// GreaterThan [gt] query
 func (q *Query) GreaterThan(field string, value interface{}) *Query {
 	q.gt[field] = value
 	return q
 }
 
-//GreaterThanOrEqual [lte] query
+// GreaterThanOrEqual [lte] query
 func (q *Query) GreaterThanOrEqual(field string, value interface{}) *Query {
 	q.gte[field] = value
 	return q
 }
 
-//Query param
+// Query param
 func (q *Query) Query(qStr string) *Query {
 	q.q = qStr
 	return q
 }
 
-//Match param
+// Match param
 func (q *Query) Match(field, match string) *Query {
 	q.match[field] = match
 	return q
 }
 
-//Near param
+// Near param
 func (q *Query) Near(field string, lat, lon int16) *Query {
 	q.near[field] = strconv.Itoa(int(lat)) + "," + strconv.Itoa(int(lon))
 	return q
 }
 
-//Within param
+// Within param
 func (q *Query) Within(field string, lat1, lon1, lat2, lon2 int16) *Query {
 	q.within[field] = strconv.Itoa(int(lat1)) + "," + strconv.Itoa(int(lon1)) + "," + strconv.Itoa(int(lat2)) + "," + strconv.Itoa(int(lon2))
 	return q
 }
 
-//WithinRadius param
+// WithinRadius param
 func (q *Query) WithinRadius(field string, lat1, lon1, radius int16) *Query {
 	q.within[field] = strconv.Itoa(int(lat1)) + "," + strconv.Itoa(int(lon1)) + "," + strconv.Itoa(int(radius))
 	return q
 }
 
-//Order param
+// Order param
 func (q *Query) Order(field string, reverse bool) *Query {
 	if reverse {
 		q.order = append(q.order, "-"+field)
@@ -203,43 +203,43 @@ func (q *Query) Order(field string, reverse bool) *Query {
 	return q
 }
 
-//Limit query
+// Limit query
 func (q *Query) Limit(limit uint16) *Query {
 	q.limit = limit
 	return q
 }
 
-//Skip query
+// Skip query
 func (q *Query) Skip(skip uint16) *Query {
 	q.skip = skip
 	return q
 }
 
-//MimeType query
+// MimeType query
 func (q *Query) MimeType(mime string) *Query {
 	q.mime = mime
 	return q
 }
 
-//Locale query
+// Locale query
 func (q *Query) Locale(locale string) *Query {
 	q.locale = locale
 	return q
 }
 
-//SyncType query
+// SyncType query
 func (q *Query) SyncType(syncType string) *Query {
 	q.syncType = syncType
 	return q
 }
 
-//Initial query
+// Initial query
 func (q *Query) Initial(initial string) *Query {
 	q.initial = initial
 	return q
 }
 
-//SyncToken query
+// SyncToken query
 func (q *Query) SyncToken(syncToken string) *Query {
 	q.syncToken = syncToken
 	return q
@@ -250,7 +250,7 @@ func (q *Query) Values() url.Values {
 	params := url.Values{}
 
 	if q.include != 0 {
-		if q.include < 0 || q.include > 10 {
+		if q.include > 10 {
 			panic("include value should be between 0 and 10")
 		}
 		params.Set("include", strconv.Itoa(int(q.include)))
@@ -446,7 +446,6 @@ func (q *Query) Values() url.Values {
 		} else {
 			panic("initial value can only be true or false")
 		}
-
 	}
 
 	if q.syncToken != "" {

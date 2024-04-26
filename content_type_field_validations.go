@@ -234,8 +234,8 @@ const (
 	// FieldValidationRegexPatternUSDate us date validation
 	FieldValidationRegexPatternUSDate = `^(0?[1-9]|[12][0-9]|3[01])[- \/.](0?[1-9]|1[012])[- \/.](19|20)?\d\d$`
 
-	// FieldValidationRegexPatternEuorpeanDate euorpean date validation
-	FieldValidationRegexPatternEuorpeanDate = `^(0?[1-9]|[12][0-9]|3[01])[- \/.](0?[1-9]|1[012])[- \/.](19|20)?\d\d$`
+	// FieldValidationRegexPatternEuropeanDate european date validation
+	FieldValidationRegexPatternEuropeanDate = `^(0?[1-9]|[12][0-9]|3[01])[- \/.](0?[1-9]|1[012])[- \/.](19|20)?\d\d$`
 
 	// FieldValidationRegexPattern12HourTime 12-hour time validation
 	FieldValidationRegexPattern12HourTime = `^(0?[1-9]|1[012]):[0-5][0-9](:[0-5][0-9])?\s*[aApP][mM]$`

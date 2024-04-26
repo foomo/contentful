@@ -2,8 +2,10 @@ package contentful
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -69,11 +71,11 @@ func (asset *Asset) GetVersion() int {
 }
 
 // List returns asset collection
-func (service *AssetsService) List(spaceID string) *Collection {
+func (service *AssetsService) List(ctx context.Context, spaceID string) *Collection {
 	path := fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -86,16 +88,16 @@ func (service *AssetsService) List(spaceID string) *Collection {
 }
 
 // Get returns a single asset entity
-func (service *AssetsService) Get(spaceID, assetID string, locale ...string) (*Asset, error) {
+func (service *AssetsService) Get(ctx context.Context, spaceID, assetID string, locale ...string) (*Asset, error) {
 	path := fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), assetID)
 	query := url.Values{}
 	if service.c.api == "CDA" && len(locale) > 0 {
 		query["locale"] = locale
 	}
 
-	method := "GET"
+	method := http.MethodGet
 
-	req, err := service.c.newRequest(method, path, query, nil)
+	req, err := service.c.newRequest(ctx, method, path, query, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -127,17 +129,16 @@ func (service *AssetsService) Get(spaceID, assetID string, locale ...string) (*A
 		return nil, err
 	}
 	return &asset, nil
-
 }
 
 // GetLocalized returns the asset with fields without localization map
-func (asset *Asset) GetLocalized() (assetNoLocale *AssetNoLocale) {
+func (asset *Asset) GetLocalized() *AssetNoLocale {
 	// No default locale available if asking for all locales, fallback to nil
 	if asset.Sys.Locale == "" {
 		return nil
 	}
 
-	assetNoLocale = &AssetNoLocale{
+	return &AssetNoLocale{
 		Sys: asset.Sys,
 		Fields: &FileFieldsNoLocale{
 			Title:       asset.Fields.Title[asset.Sys.Locale],
@@ -145,11 +146,10 @@ func (asset *Asset) GetLocalized() (assetNoLocale *AssetNoLocale) {
 			File:        asset.Fields.File[asset.Sys.Locale],
 		},
 	}
-	return
 }
 
 // Upsert updates or creates a new asset entity
-func (service *AssetsService) Upsert(spaceID string, asset *Asset) error {
+func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset *Asset) error {
 	bytesArray, err := json.Marshal(asset)
 	if err != nil {
 		return err
@@ -166,7 +166,7 @@ func (service *AssetsService) Upsert(spaceID string, asset *Asset) error {
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
 	if err != nil {
 		return err
 	}
@@ -177,11 +177,11 @@ func (service *AssetsService) Upsert(spaceID string, asset *Asset) error {
 }
 
 // Delete sends delete request
-func (service *AssetsService) Delete(spaceID string, asset *Asset) error {
+func (service *AssetsService) Delete(ctx context.Context, spaceID string, asset *Asset) error {
 	path := fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), asset.Sys.ID)
-	method := "DELETE"
+	method := http.MethodDelete
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -193,7 +193,7 @@ func (service *AssetsService) Delete(spaceID string, asset *Asset) error {
 }
 
 // Process the asset
-func (service *AssetsService) Process(spaceID string, asset *Asset) error {
+func (service *AssetsService) Process(ctx context.Context, spaceID string, asset *Asset) error {
 	var locale string
 	for k := range asset.Fields.Title {
 		locale = k
@@ -201,9 +201,9 @@ func (service *AssetsService) Process(spaceID string, asset *Asset) error {
 			continue
 		}
 		path := fmt.Sprintf("/spaces/%s%s/assets/%s/files/%s/process", spaceID, getEnvPath(service.c), asset.Sys.ID, locale)
-		method := "PUT"
+		method := http.MethodPut
 
-		req, err := service.c.newRequest(method, path, nil, nil)
+		req, err := service.c.newRequest(ctx, method, path, nil, nil)
 		if err != nil {
 			return err
 		}
@@ -219,11 +219,11 @@ func (service *AssetsService) Process(spaceID string, asset *Asset) error {
 }
 
 // Publish publishes the asset
-func (service *AssetsService) Publish(spaceID string, asset *Asset) error {
+func (service *AssetsService) Publish(ctx context.Context, spaceID string, asset *Asset) error {
 	path := fmt.Sprintf("/spaces/%s%s/assets/%s/published", spaceID, getEnvPath(service.c), asset.Sys.ID)
-	method := "PUT"
+	method := http.MethodPut
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -235,11 +235,11 @@ func (service *AssetsService) Publish(spaceID string, asset *Asset) error {
 }
 
 // Unpublish unpublishes the asset
-func (service *AssetsService) Unpublish(spaceID string, asset *Asset) error {
+func (service *AssetsService) Unpublish(ctx context.Context, spaceID string, asset *Asset) error {
 	path := fmt.Sprintf("/spaces/%s%s/assets/%s/published", spaceID, getEnvPath(service.c), asset.Sys.ID)
-	method := "DELETE"
+	method := http.MethodDelete
 
-	req, err := service.c.newRequest(method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil)
 	if err != nil {
 		return err
 	}

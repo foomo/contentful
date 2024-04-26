@@ -80,21 +80,20 @@ func (e ValidationFailedError) Error() string {
 			return msg.String()
 		case "notResolvable":
 			if err.Path != nil {
-				switch err.Path.(type) {
+				switch path := err.Path.(type) {
 				case []interface{}:
-					path := err.Path.([]interface{})
 					pathString := ""
 					for _, segment := range path {
 						switch segment.(type) {
 						case string:
-							pathString += fmt.Sprintf("/%s", segment.(string))
+							pathString += fmt.Sprintf("/%s", segment)
 						}
 					}
-					msg.WriteString(fmt.Sprintf("errorName: %s, path: %s", err.Name, pathString))
+					_, _ = msg.WriteString(fmt.Sprintf("errorName: %s, path: %s", err.Name, pathString))
 				}
 			}
 		default:
-			msg.WriteString(fmt.Sprintf("%s\n", err.Details))
+			_, _ = msg.WriteString(fmt.Sprintf("%s\n", err.Details))
 		}
 	}
 

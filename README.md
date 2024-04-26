@@ -16,7 +16,7 @@ GoLang SDK for [Contentful's](https://www.contentful.com) Content Delivery, Prev
 
 # Install
 
-`go get github.com/contentful-labs/contentful-go`
+`go get github.com/foomo/contentful`
 
 # Getting started
 
@@ -24,7 +24,7 @@ Import into your Go project or library
 
 ```go
 import (
-	contentful "github.com/contentful-labs/contentful-go"
+	"github.com/foomo/contentful"
 )
 ```
 
@@ -51,15 +51,11 @@ When debug mode is activated, sdk client starts to work in verbose mode and try 
 cma.Debug = true
 ```
 
-#### Dependencies
-
-`contentful-go` stores its dependencies under `vendor` folder and uses [`dep`](https://github.com/golang/dep) to manage dependency resolutions. Dependencies in `vendor` folder will be loaded automatically by [Go 1.6+](https://golang.org/cmd/go/#hdr-Vendor_Directories). To install the dependencies, run `dep ensure`, for more options and documentation please visit [`dep`](https://github.com/golang/dep).
-
 # Using the SDK
 
 ## Working with resource services
 
-Currently SDK exposes the following resource services:
+Currently, SDK exposes the following resource services:
 
 * Spaces
 * APIKeys
@@ -72,21 +68,21 @@ Currently SDK exposes the following resource services:
 Every resource service has at least the following interface:
 
 ```go
-List() *Collection
-Get(spaceID, resourceID string) <Resource>, error
-Upsert(spaceID string, resourceID *Resource) error
-Delete(spaceID string, resourceID *Resource) error
+List(ctx) *Collection
+Get(ctx, spaceID, resourceID string) <Resource>, error
+Upsert(ctx, spaceID string, resourceID *Resource) error
+Delete(ctx, spaceID string, resourceID *Resource) error
 ```
 
 #### Example
 
 ```go
-space, err := cma.Spaces.Get("space-id")
+space, err := cma.Spaces.Get(ctx, "space-id")
 if err != nil {
   log.Fatal(err)
 }
 
-collection := cma.ContentTypes.List(space.Sys.ID)
+collection := cma.ContentTypes.List(ctx, space.Sys.ID)
 collection, err := collection.Next()
 if err != nil {
   log.Fatal(err)
