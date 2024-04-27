@@ -41,7 +41,7 @@ type Collection struct {
 	Details *ErrorDetails
 }
 
-var syncTokenRegex = regexp.MustCompile(`sync_token=([a-zA-Z0-9\\-_]+)`)
+var syncTokenRegex = regexp.MustCompile(`sync_token=([a-zA-Z0-9_\-]+)`)
 
 // NewCollection initializes a new collection
 func NewCollection(options *CollectionOptions) *Collection {
@@ -80,12 +80,11 @@ func (col *Collection) Next() (*Collection, error) {
 	}
 
 	col.page++
-	r, _ := regexp.Compile("sync_token=([a-zA-Z0-9\\-\\_]+)")
 	if col.NextPageURL != "" {
-		syncToken := r.FindStringSubmatch(col.NextPageURL)
+		syncToken := syncTokenRegex.FindStringSubmatch(col.NextPageURL)
 		col.SyncToken = syncToken[1]
 	} else if col.NextSyncURL != "" {
-		syncToken := r.FindStringSubmatch(col.NextSyncURL)
+		syncToken := syncTokenRegex.FindStringSubmatch(col.NextSyncURL)
 		col.SyncToken = syncToken[1]
 	}
 	return col, nil
