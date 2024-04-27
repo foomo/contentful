@@ -32,13 +32,13 @@ type Collection struct {
 	Includes    map[string]interface{} `json:"includes"`
 	NextSyncURL string                 `json:"nextSyncUrl"`
 	NextPageURL string                 `json:"nextPageUrl"`
-	SyncToken   string
+	SyncToken   string                 `json:"syncToken"`
 	// Errors which occur in the contentful structure. They are not checked in
 	// this source code. Please do it yourself as you might still want to parse
 	// the result despite the error.
 	Errors []Error `json:"errors"`
 	// Details might also get set in case of errors.
-	Details *ErrorDetails
+	Details *ErrorDetails `json:"details"`
 }
 
 var syncTokenRegex = regexp.MustCompile(`sync_token=([a-zA-Z0-9_\-]+)`)
