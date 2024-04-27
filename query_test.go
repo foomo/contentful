@@ -29,6 +29,14 @@ func TestQueryContentType(t *testing.T) {
 	assert.Equal(t, expected.Encode(), q.String())
 }
 
+func TestQueryInitial(t *testing.T) {
+	q := NewQuery().Initial("true")
+	expected := url.Values{}
+	expected.Set("initial", "true")
+	expected.Set("include", "0")
+	assert.Equal(t, expected.Encode(), q.String())
+}
+
 func TestQuerySelect(t *testing.T) {
 	q := NewQuery().
 		ContentType("ct").
