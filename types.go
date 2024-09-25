@@ -9,6 +9,9 @@ type Sys struct {
 	UpdatedAt        string       `json:"updatedAt,omitempty"`
 	UpdatedBy        *Sys         `json:"updatedBy,omitempty"`
 	Version          int          `json:"version,omitempty"`
+	ArchivedAt       string       `json:"archivedAt,omitempty"`
+	ArchivedBy       *Sys         `json:"archivedBy,omitempty"`
+	ArchivedVersion  int          `json:"archivedVersion,omitempty"`
 	Revision         int          `json:"revision,omitempty"`
 	ContentType      *ContentType `json:"contentType,omitempty"`
 	Space            *Space       `json:"space,omitempty"`
