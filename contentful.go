@@ -32,6 +32,7 @@ type Contentful struct {
 	ContentTypes *ContentTypesService
 	Entries      *EntriesService
 	Locales      *LocalesService
+	Tags         *TagsService
 	Webhooks     *WebhooksService
 }
 
@@ -66,6 +67,7 @@ func NewCMA(token string) *Contentful {
 	c.Assets = &AssetsService{c: c}
 	c.ContentTypes = &ContentTypesService{c: c}
 	c.Entries = &EntriesService{c: c}
+	c.Tags = &TagsService{c: c}
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
 
@@ -92,6 +94,7 @@ func NewCDA(token string) *Contentful {
 	c.Assets = &AssetsService{c: c}
 	c.ContentTypes = &ContentTypesService{c: c}
 	c.Entries = &EntriesService{c: c}
+	c.Tags = &TagsService{c: c}
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
 
@@ -116,6 +119,7 @@ func NewCPA(token string) *Contentful {
 	c.Assets = &AssetsService{c: c}
 	c.ContentTypes = &ContentTypesService{c: c}
 	c.Entries = &EntriesService{c: c}
+	c.Tags = &TagsService{c: c}
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
 
