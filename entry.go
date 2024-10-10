@@ -15,8 +15,9 @@ type EntriesService service
 
 // Entry model
 type Entry struct {
-	Sys    *Sys                   `json:"sys"`
-	Fields map[string]interface{} `json:"fields,omitempty"`
+	Metadata *Metadata              `json:"metadata,omitempty"`
+	Sys      *Sys                   `json:"sys"`
+	Fields   map[string]interface{} `json:"fields,omitempty"`
 }
 
 // GetVersion returns entity version

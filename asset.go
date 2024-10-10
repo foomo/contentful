@@ -50,8 +50,9 @@ type FileFieldsNoLocale struct {
 
 // Asset model
 type Asset struct {
-	Sys    *Sys        `json:"sys"`
-	Fields *FileFields `json:"fields"`
+	Metadata *Metadata   `json:"metadata,omitempty"`
+	Sys      *Sys        `json:"sys"`
+	Fields   *FileFields `json:"fields"`
 }
 
 // AssetNoLocale model
