@@ -59,7 +59,7 @@ func (service *APIKeyService) List(ctx context.Context, spaceID string) *Collect
 	path := fmt.Sprintf("/spaces/%s%s/api_keys", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -76,7 +76,7 @@ func (service *APIKeyService) Get(ctx context.Context, spaceID, apiKeyID string)
 	path := fmt.Sprintf("/spaces/%s%s/api_keys/%s", spaceID, getEnvPath(service.c), apiKeyID)
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (service *APIKeyService) Upsert(ctx context.Context, spaceID string, apiKey
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (service *APIKeyService) Delete(ctx context.Context, spaceID string, apiKey
 	path := fmt.Sprintf("/spaces/%s%s/api_keys/%s", spaceID, getEnvPath(service.c), apiKey.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}

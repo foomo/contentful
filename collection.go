@@ -114,7 +114,7 @@ func (col *Collection) GetAll() (*Collection, error) {
 			return nil, errNext
 		}
 		allItems = append(allItems, col.Items...)
-		if uint16(len(col.Items)) < col.Limit {
+		if len(col.Items) < int(col.Limit) {
 			break
 		}
 	}

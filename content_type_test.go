@@ -756,10 +756,10 @@ func TestContentTypeFieldTypeMedia(t *testing.T) {
 		// size validation
 		validationSize := validations[2].(map[string]interface{})
 		sizeData := validationSize["assetFileSize"].(map[string]interface{})
-		min := int(sizeData["min"].(float64))
-		max := int(sizeData["max"].(float64))
-		assert.Equal(t, 30, min)
-		assert.Equal(t, 400, max)
+		minimum := int(sizeData["min"].(float64))
+		maximum := int(sizeData["max"].(float64))
+		assert.Equal(t, 30, minimum)
+		assert.Equal(t, 400, maximum)
 
 		w.WriteHeader(http.StatusCreated)
 		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))

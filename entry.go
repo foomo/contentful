@@ -68,7 +68,7 @@ func (service *EntriesService) List(ctx context.Context, spaceID string) *Collec
 	path := fmt.Sprintf("/spaces/%s%s/entries", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -85,7 +85,7 @@ func (service *EntriesService) Sync(ctx context.Context, spaceID string, initial
 	path := fmt.Sprintf("/spaces/%s%s/sync", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -112,7 +112,7 @@ func (service *EntriesService) Get(ctx context.Context, spaceID, entryID string,
 	}
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, query, nil)
+	req, err := service.c.newRequest(ctx, method, path, query, nil, nil)
 	if err != nil {
 		return &Entry{}, err
 	}
@@ -130,7 +130,7 @@ func (service *EntriesService) Delete(ctx context.Context, spaceID string, entry
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s", spaceID, getEnvPath(service.c), entryID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func (service *EntriesService) Upsert(ctx context.Context, spaceID string, entry
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (service *EntriesService) Publish(ctx context.Context, spaceID string, entr
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s/published", spaceID, getEnvPath(service.c), entry.Sys.ID)
 	method := http.MethodPut
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func (service *EntriesService) Unpublish(ctx context.Context, spaceID string, en
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s/published", spaceID, getEnvPath(service.c), entry.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (service *EntriesService) Archive(ctx context.Context, spaceID string, entr
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s/archived", spaceID, getEnvPath(service.c), entry.Sys.ID)
 	method := http.MethodPut
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}

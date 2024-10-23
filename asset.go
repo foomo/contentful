@@ -19,6 +19,7 @@ type File struct {
 	ContentType string      `json:"contentType,omitempty"`
 	URL         string      `json:"url,omitempty"`
 	UploadURL   string      `json:"upload,omitempty"`
+	UploadFrom  *Upload     `json:"uploadFrom,omitempty"`
 	Detail      *FileDetail `json:"details,omitempty"`
 }
 
@@ -76,7 +77,7 @@ func (service *AssetsService) List(ctx context.Context, spaceID string) *Collect
 	path := fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -98,7 +99,7 @@ func (service *AssetsService) Get(ctx context.Context, spaceID, assetID string, 
 
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, query, nil)
+	req, err := service.c.newRequest(ctx, method, path, query, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +168,7 @@ func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset 
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
 	if err != nil {
 		return err
 	}
@@ -182,7 +183,7 @@ func (service *AssetsService) Delete(ctx context.Context, spaceID string, asset 
 	path := fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), asset.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -198,13 +199,10 @@ func (service *AssetsService) Process(ctx context.Context, spaceID string, asset
 	var locale string
 	for k := range asset.Fields.Title {
 		locale = k
-		if asset.Fields.File[k].UploadURL == "" {
-			continue
-		}
 		path := fmt.Sprintf("/spaces/%s%s/assets/%s/files/%s/process", spaceID, getEnvPath(service.c), asset.Sys.ID, locale)
 		method := http.MethodPut
 
-		req, err := service.c.newRequest(ctx, method, path, nil, nil)
+		req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 		if err != nil {
 			return err
 		}
@@ -224,7 +222,7 @@ func (service *AssetsService) Publish(ctx context.Context, spaceID string, asset
 	path := fmt.Sprintf("/spaces/%s%s/assets/%s/published", spaceID, getEnvPath(service.c), asset.Sys.ID)
 	method := http.MethodPut
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -240,7 +238,7 @@ func (service *AssetsService) Unpublish(ctx context.Context, spaceID string, ass
 	path := fmt.Sprintf("/spaces/%s%s/assets/%s/published", spaceID, getEnvPath(service.c), asset.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}

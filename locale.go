@@ -53,7 +53,7 @@ func (service *LocalesService) List(ctx context.Context, spaceID string) *Collec
 	path := fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -70,7 +70,7 @@ func (service *LocalesService) Get(ctx context.Context, spaceID, localeID string
 	path := fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), localeID)
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (service *LocalesService) Delete(ctx context.Context, spaceID string, local
 	path := fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), locale.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ func (service *LocalesService) Upsert(ctx context.Context, spaceID string, local
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
 	if err != nil {
 		return err
 	}

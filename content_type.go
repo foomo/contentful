@@ -296,7 +296,7 @@ func (ct *ContentType) GetVersion() int {
 func (service *ContentTypesService) List(ctx context.Context, spaceID string) *Collection {
 	path := fmt.Sprintf("/spaces/%s%s/content_types", spaceID, getEnvPath(service.c))
 
-	req, err := service.c.newRequest(ctx, http.MethodGet, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodGet, path, nil, nil, nil)
 	if err != nil {
 		return nil
 	}
@@ -312,7 +312,7 @@ func (service *ContentTypesService) List(ctx context.Context, spaceID string) *C
 func (service *ContentTypesService) Get(ctx context.Context, spaceID, contentTypeID string) (*ContentType, error) {
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s", spaceID, getEnvPath(service.c), contentTypeID)
 
-	req, err := service.c.newRequest(ctx, http.MethodGet, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodGet, path, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +343,7 @@ func (service *ContentTypesService) Upsert(ctx context.Context, spaceID string, 
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
 	if err != nil {
 		return err
 	}
@@ -358,7 +358,7 @@ func (service *ContentTypesService) Delete(ctx context.Context, spaceID string, 
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s", spaceID, getEnvPath(service.c), ct.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -373,7 +373,7 @@ func (service *ContentTypesService) Delete(ctx context.Context, spaceID string, 
 func (service *ContentTypesService) Activate(ctx context.Context, spaceID string, ct *ContentType) error {
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s/published", spaceID, getEnvPath(service.c), ct.Sys.ID)
 
-	req, err := service.c.newRequest(ctx, http.MethodPut, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodPut, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -388,7 +388,7 @@ func (service *ContentTypesService) Activate(ctx context.Context, spaceID string
 func (service *ContentTypesService) Deactivate(ctx context.Context, spaceID string, ct *ContentType) error {
 	path := fmt.Sprintf("/spaces/%s%s/content_types/%s/published", spaceID, getEnvPath(service.c), ct.Sys.ID)
 
-	req, err := service.c.newRequest(ctx, http.MethodDelete, path, nil, nil)
+	req, err := service.c.newRequest(ctx, http.MethodDelete, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
