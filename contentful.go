@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aoliveti/curling"
@@ -24,6 +26,7 @@ type Contentful struct {
 	QueryParams map[string]string
 	Headers     map[string]string
 	BaseURL     string
+	UploadURL   string
 	Environment string
 
 	Spaces       *SpacesService
@@ -33,6 +36,7 @@ type Contentful struct {
 	Entries      *EntriesService
 	Locales      *LocalesService
 	Tags         *TagsService
+	Upload       *UploadService
 	Webhooks     *WebhooksService
 }
 
@@ -59,7 +63,8 @@ func NewCMA(token string) *Contentful {
 			"Content-Type":            "application/vnd.contentful.management.v1+json",
 			"X-Contentful-User-Agent": fmt.Sprintf("sdk contentful.go/%s", Version),
 		},
-		BaseURL: "https://api.contentful.com",
+		BaseURL:   "https://api.contentful.com",
+		UploadURL: "https://upload.contentful.com",
 	}
 
 	c.Spaces = &SpacesService{c: c}
@@ -68,6 +73,7 @@ func NewCMA(token string) *Contentful {
 	c.ContentTypes = &ContentTypesService{c: c}
 	c.Entries = &EntriesService{c: c}
 	c.Tags = &TagsService{c: c}
+	c.Upload = &UploadService{c: c}
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
 
@@ -153,8 +159,20 @@ func (c *Contentful) SetBaseURL(baseURL string) *Contentful {
 	return c
 }
 
-func (c *Contentful) newRequest(ctx context.Context, method, path string, query url.Values, body io.Reader) (*http.Request, error) {
-	u, err := url.Parse(c.BaseURL)
+func (c *Contentful) newRequest(ctx context.Context, method, requestPath string, query url.Values, body io.Reader, additionalHeaders map[string]string) (*http.Request, error) {
+	if idx := strings.Index(requestPath, "?"); idx != -1 {
+		requestPath = requestPath[:idx]
+	}
+	cleanUrl := path.Clean(requestPath)
+	_, lastSegment := path.Split(cleanUrl)
+	var u *url.URL
+	var err error
+	switch lastSegment {
+	case "uploads":
+		u, err = url.Parse(c.UploadURL)
+	default:
+		u, err = url.Parse(c.BaseURL)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +182,7 @@ func (c *Contentful) newRequest(ctx context.Context, method, path string, query 
 		query.Set(key, value)
 	}
 
-	u.Path = u.Path + path
+	u.Path = u.Path + requestPath
 	u.RawQuery = query.Encode()
 
 	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)
@@ -174,6 +192,9 @@ func (c *Contentful) newRequest(ctx context.Context, method, path string, query 
 
 	// set headers
 	for key, value := range c.Headers {
+		req.Header.Set(key, value)
+	}
+	for key, value := range additionalHeaders {
 		req.Header.Set(key, value)
 	}
 

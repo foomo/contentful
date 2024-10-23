@@ -21,7 +21,7 @@ func (service *TagsService) List(ctx context.Context, spaceID string) *Collectio
 	path := fmt.Sprintf("/spaces/%s%s/tags", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -42,7 +42,7 @@ func (service *TagsService) Get(ctx context.Context, spaceID, tagID string, loca
 	}
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, query, nil)
+	req, err := service.c.newRequest(ctx, method, path, query, nil, nil)
 	if err != nil {
 		return &Tag{}, err
 	}

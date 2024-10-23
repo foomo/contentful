@@ -61,7 +61,7 @@ func TestNewCollection(t *testing.T) {
 			Filename: "error-notResolvable.json",
 		})
 
-		req, err := c.newRequest(context.TODO(), http.MethodGet, "/", url.Values{}, nil)
+		req, err := c.newRequest(context.TODO(), http.MethodGet, "/", url.Values{}, nil, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -92,7 +92,7 @@ func TestNewCollection(t *testing.T) {
 			Filename: "error-nameUnknown.json",
 		})
 
-		req, err := c.newRequest(context.TODO(), http.MethodGet, "/", url.Values{}, nil)
+		req, err := c.newRequest(context.TODO(), http.MethodGet, "/", url.Values{}, nil, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

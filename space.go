@@ -42,7 +42,7 @@ func (space *Space) GetVersion() int {
 
 // List creates a spaces collection
 func (service *SpacesService) List(ctx context.Context) *Collection {
-	req, _ := service.c.newRequest(ctx, http.MethodGet, "/spaces", nil, nil)
+	req, _ := service.c.newRequest(ctx, http.MethodGet, "/spaces", nil, nil, nil)
 
 	col := NewCollection(&CollectionOptions{})
 	col.c = service.c
@@ -56,7 +56,7 @@ func (service *SpacesService) Get(ctx context.Context, spaceID string) (*Space, 
 	path := fmt.Sprintf("/spaces/%s", spaceID)
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Space{}, err
 	}
@@ -87,7 +87,7 @@ func (service *SpacesService) Upsert(ctx context.Context, space *Space) error {
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (service *SpacesService) Delete(ctx context.Context, space *Space) error {
 	path := fmt.Sprintf("/spaces/%s", space.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}

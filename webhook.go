@@ -44,7 +44,7 @@ func (service *WebhooksService) List(ctx context.Context, spaceID string) *Colle
 	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return &Collection{}
 	}
@@ -61,7 +61,7 @@ func (service *WebhooksService) Get(ctx context.Context, spaceID, webhookID stri
 	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions/%s", spaceID, getEnvPath(service.c), webhookID)
 	method := http.MethodGet
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (service *WebhooksService) Upsert(ctx context.Context, spaceID string, webh
 		method = "POST"
 	}
 
-	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray))
+	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func (service *WebhooksService) Delete(ctx context.Context, spaceID string, webh
 	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions/%s", spaceID, getEnvPath(service.c), webhook.Sys.ID)
 	method := http.MethodDelete
 
-	req, err := service.c.newRequest(ctx, method, path, nil, nil)
+	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
 		return err
 	}
