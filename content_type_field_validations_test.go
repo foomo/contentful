@@ -131,16 +131,16 @@ func TestFieldValidationDate(t *testing.T) {
 	var err error
 
 	layout := "2006-01-02T03:04:05"
-	min := time.Now()
-	max := time.Now()
+	minimum := time.Now()
+	maximum := time.Now()
 
-	minStr := min.Format(layout)
-	maxStr := max.Format(layout)
+	minStr := minimum.Format(layout)
+	maxStr := maximum.Format(layout)
 
 	validation := &FieldValidationDate{
 		Range: &DateMinMax{
-			Min: min,
-			Max: max,
+			Min: minimum,
+			Max: maximum,
 		},
 		ErrorMessage: "error message",
 	}
