@@ -106,24 +106,24 @@ func (v *FieldValidationDimension) UnmarshalJSON(data []byte) error {
 	if width, ok := dimensionData["width"].(map[string]interface{}); ok {
 		v.Width = &MinMax{}
 
-		if min, ok := width["min"].(float64); ok {
-			v.Width.Min = min
+		if minimum, ok := width["min"].(float64); ok {
+			v.Width.Min = minimum
 		}
 
-		if max, ok := width["min"].(float64); ok {
-			v.Width.Max = max
+		if maximum, ok := width["min"].(float64); ok {
+			v.Width.Max = maximum
 		}
 	}
 
 	if height, ok := dimensionData["height"].(map[string]interface{}); ok {
 		v.Height = &MinMax{}
 
-		if min, ok := height["min"].(float64); ok {
-			v.Height.Min = min
+		if minimum, ok := height["min"].(float64); ok {
+			v.Height.Min = minimum
 		}
 
-		if max, ok := height["max"].(float64); ok {
-			v.Height.Max = max
+		if maximum, ok := height["max"].(float64); ok {
+			v.Height.Max = maximum
 		}
 	}
 
@@ -193,8 +193,8 @@ func (v *FieldValidationDate) UnmarshalJSON(data []byte) error {
 
 	v.Range = &DateMinMax{}
 
-	if min, ok := dateRangeData["min"].(string); ok {
-		minDate, err := time.Parse("2006-01-02T03:04:05", min)
+	if minimum, ok := dateRangeData["min"].(string); ok {
+		minDate, err := time.Parse("2006-01-02T03:04:05", minimum)
 		if err != nil {
 			return err
 		}
@@ -202,8 +202,8 @@ func (v *FieldValidationDate) UnmarshalJSON(data []byte) error {
 		v.Range.Min = minDate
 	}
 
-	if max, ok := dateRangeData["max"].(string); ok {
-		maxDate, err := time.Parse("2006-01-02T03:04:05", max)
+	if maximum, ok := dateRangeData["max"].(string); ok {
+		maxDate, err := time.Parse("2006-01-02T03:04:05", maximum)
 		if err != nil {
 			return err
 		}
