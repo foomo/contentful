@@ -16,7 +16,10 @@ type ErrorResponse struct {
 }
 
 func (e ErrorResponse) Error() string {
-	byt, _ := json.Marshal(e)
+	byt, err := json.Marshal(e)
+	if err != nil {
+		return fmt.Sprintf("error marshaling ErrorResponse: %v - original error message: %v", err, e.Message)
+	}
 	return string(byt)
 }
 
