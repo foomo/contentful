@@ -2,6 +2,7 @@ package contentful
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -15,7 +16,8 @@ type ErrorResponse struct {
 }
 
 func (e ErrorResponse) Error() string {
-	return e.Message
+	byt, _ := json.Marshal(e)
+	return string(byt)
 }
 
 // Error defines an internal contentful data model error when e.g. an assets can
