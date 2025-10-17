@@ -13,6 +13,9 @@
 ## GitHub
 !.github/
 
+## Mise
+!.mise.toml
+
 ## Editorconfig
 !.editorconfig
 
