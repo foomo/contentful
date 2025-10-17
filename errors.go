@@ -59,7 +59,7 @@ type AccessTokenInvalidError struct {
 }
 
 func (e AccessTokenInvalidError) Error() string {
-	return e.APIError.err.Message
+	return e.err.Message
 }
 
 // VersionMismatchError for 409 errors
@@ -68,7 +68,7 @@ type VersionMismatchError struct {
 }
 
 func (e VersionMismatchError) Error() string {
-	return "Version " + e.APIError.req.Header.Get("X-Contentful-Version") + " is mismatched"
+	return "Version " + e.req.Header.Get("X-Contentful-Version") + " is mismatched"
 }
 
 // ValidationFailedError model
@@ -79,7 +79,7 @@ type ValidationFailedError struct {
 func (e ValidationFailedError) Error() string {
 	msg := bytes.Buffer{}
 
-	for _, err := range e.APIError.err.Details.Errors {
+	for _, err := range e.err.Details.Errors {
 		switch err.Name {
 		case "uniqueFieldIds", "uniqueFieldApiNames":
 			return msg.String()
@@ -120,7 +120,7 @@ type RateLimitExceededError struct {
 }
 
 func (e RateLimitExceededError) Error() string {
-	return e.APIError.err.Message
+	return e.err.Message
 }
 
 // BadRequestError error model for bad request responses

@@ -34,7 +34,7 @@ func ExampleEntriesService_Upsert_create() {
 
 	err := cma.Entries.Upsert(context.TODO(), "space-id", entry)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -43,7 +43,7 @@ func ExampleEntriesService_Upsert_update() {
 
 	entry, err := cma.Entries.Get(context.TODO(), "space-id", "entry-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	entry.Fields["Description"] = map[string]interface{}{
@@ -52,7 +52,7 @@ func ExampleEntriesService_Upsert_update() {
 
 	err = cma.Entries.Upsert(context.TODO(), "space-id", entry)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -67,7 +67,7 @@ func TestEntrySaveForCreate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		assert.NotNil(t, payload["fields"])
 		fields := payload["fields"].(map[string]interface{})

@@ -75,7 +75,7 @@ func TestLocalesServiceUpsertCreate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "German (Austria)", payload["name"])
 		assert.Equal(t, "de-AT", payload["code"])
 
@@ -111,7 +111,7 @@ func TestLocalesServiceUpsertUpdate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "modified-name", payload["name"])
 		assert.Equal(t, "modified-code", payload["code"])
 

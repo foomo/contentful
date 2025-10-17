@@ -73,16 +73,16 @@ func (asset *Asset) GetVersion() int {
 }
 
 // List returns asset collection
-func (service *AssetsService) List(ctx context.Context, spaceID string) *Collection {
+func (service *AssetsService) List(ctx context.Context, spaceID string) *Collection[*Asset] {
 	path := fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[*Asset]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[*Asset](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -162,10 +162,10 @@ func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset 
 
 	if asset.Sys.ID != "" {
 		path = fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), asset.Sys.ID)
-		method = "PUT"
+		method = http.MethodPut
 	} else {
 		path = fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
-		method = "POST"
+		method = http.MethodPost
 	}
 
 	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)

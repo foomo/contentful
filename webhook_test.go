@@ -22,7 +22,7 @@ func TestWebhookSaveForCreate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "webhook-name", payload["name"])
 		assert.Equal(t, "https://www.example.com/test", payload["url"])
 		assert.Equal(t, "username", payload["httpBasicUsername"])
@@ -94,7 +94,7 @@ func TestWebhookSaveForUpdate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "updated-webhook-name", payload["name"])
 		assert.Equal(t, "https://www.example.com/test-updated", payload["url"])
 		assert.Equal(t, "updated-username", payload["httpBasicUsername"])

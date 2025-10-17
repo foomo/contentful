@@ -49,16 +49,16 @@ func (locale *Locale) GetVersion() int {
 }
 
 // List returns a locales collection
-func (service *LocalesService) List(ctx context.Context, spaceID string) *Collection {
+func (service *LocalesService) List(ctx context.Context, spaceID string) *Collection[*Locale] {
 	path := fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[*Locale]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[*Locale](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -111,10 +111,10 @@ func (service *LocalesService) Upsert(ctx context.Context, spaceID string, local
 
 	if locale.Sys != nil && locale.Sys.CreatedAt != "" {
 		path = fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), locale.Sys.ID)
-		method = "PUT"
+		method = http.MethodPut
 	} else {
 		path = fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
-		method = "POST"
+		method = http.MethodPost
 	}
 
 	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)

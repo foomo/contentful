@@ -40,16 +40,16 @@ func (webhook *Webhook) GetVersion() int {
 }
 
 // List returns webhooks collection
-func (service *WebhooksService) List(ctx context.Context, spaceID string) *Collection {
+func (service *WebhooksService) List(ctx context.Context, spaceID string) *Collection[*Webhook] {
 	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[*Webhook]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[*Webhook](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -86,10 +86,10 @@ func (service *WebhooksService) Upsert(ctx context.Context, spaceID string, webh
 
 	if webhook.Sys != nil && webhook.Sys.CreatedAt != "" {
 		path = fmt.Sprintf("/spaces/%s%s/webhook_definitions/%s", spaceID, getEnvPath(service.c), webhook.Sys.ID)
-		method = "PUT"
+		method = http.MethodPut
 	} else {
 		path = fmt.Sprintf("/spaces/%s%s/webhook_definitions", spaceID, getEnvPath(service.c))
-		method = "POST"
+		method = http.MethodPost
 	}
 
 	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)

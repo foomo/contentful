@@ -195,7 +195,7 @@ func TestNewRequest(t *testing.T) {
 	assert.Equal(t, req.Method, method)
 	assert.Equal(t, req.URL.String(), expectedURL.String())
 
-	method = "POST"
+	method = http.MethodPost
 	type RequestBody struct {
 		Name string `json:"name"`
 		Age  int    `json:"age"`
@@ -253,7 +253,8 @@ func TestHandleError(t *testing.T) {
 	}
 
 	err = c.handleError(req, res)
-	assert.IsType(t, AccessTokenInvalidError{}, err)
+	var expectedError *AccessTokenInvalidError
+	require.ErrorAs(t, err, &expectedError)
 	assert.Equal(t, req, err.(AccessTokenInvalidError).APIError.req)          //nolint:errorlint
 	assert.Equal(t, res, err.(AccessTokenInvalidError).APIError.res)          //nolint:errorlint
 	assert.Equal(t, &errResponse, err.(AccessTokenInvalidError).APIError.err) //nolint:errorlint

@@ -182,7 +182,7 @@ func (c *Contentful) newRequest(ctx context.Context, method, requestPath string,
 		query.Set(key, value)
 	}
 
-	u.Path = u.Path + requestPath
+	u.Path += requestPath
 	u.RawQuery = query.Encode()
 
 	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)
@@ -234,7 +234,7 @@ func (c *Contentful) do(req *http.Request, v interface{}) error {
 		return apiError
 	}
 
-	resetHeader := res.Header.Get("x-contentful-ratelimit-reset")
+	resetHeader := res.Header.Get("X-Contentful-Ratelimit-Reset")
 
 	// return apiError if Ratelimit-Reset header is not presented
 	if resetHeader == "" {

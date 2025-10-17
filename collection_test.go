@@ -65,7 +65,7 @@ func TestNewCollection(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		var data Collection
+		var data Collection[any]
 		if err := c.do(req, &data); err != nil {
 			t.Fatal(err)
 		}
@@ -96,7 +96,7 @@ func TestNewCollection(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		var data Collection
+		var data Collection[any]
 		if err := c.do(req, &data); err != nil {
 			t.Fatal(err)
 		}
@@ -126,7 +126,7 @@ type roundTrip struct {
 
 func (rt roundTrip) RoundTrip(*http.Request) (*http.Response, error) {
 	if rt.Code == 0 {
-		rt.Code = http.StatusOK //nolint:revive
+		rt.Code = http.StatusOK
 	}
 	f, err := os.Open("testdata/" + rt.Filename)
 	if err != nil {

@@ -41,12 +41,7 @@ func (service *EntriesService) GetEntryKey(ctx context.Context, entry *Entry, ke
 		return nil, err
 	}
 
-	cts, err := col.ToContentType()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, ct := range cts {
+	for _, ct := range col.Items {
 		if ct.Sys.ID != entry.Sys.ContentType.Sys.ID {
 			continue
 		}
@@ -64,16 +59,16 @@ func (service *EntriesService) GetEntryKey(ctx context.Context, entry *Entry, ke
 }
 
 // List returns entries collection
-func (service *EntriesService) List(ctx context.Context, spaceID string) *Collection {
+func (service *EntriesService) List(ctx context.Context, spaceID string) *Collection[*Entry] {
 	path := fmt.Sprintf("/spaces/%s%s/entries", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[*Entry]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[*Entry](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -81,18 +76,18 @@ func (service *EntriesService) List(ctx context.Context, spaceID string) *Collec
 }
 
 // Sync returns entries collection
-func (service *EntriesService) Sync(ctx context.Context, spaceID string, initial bool, syncToken ...string) *Collection {
+func (service *EntriesService) Sync(ctx context.Context, spaceID string, initial bool, syncToken ...string) *Collection[*Entry] {
 	path := fmt.Sprintf("/spaces/%s%s/sync", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[*Entry]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[*Entry](&CollectionOptions{})
 	if initial {
-		col.Query.Initial("true")
+		col.Initial("true")
 	}
 	if len(syncToken) == 1 {
 		col.SyncToken = syncToken[0]
@@ -118,7 +113,7 @@ func (service *EntriesService) Get(ctx context.Context, spaceID, entryID string,
 	}
 
 	var entry Entry
-	if ok := service.c.do(req, &entry); ok != nil {
+	if err := service.c.do(req, &entry); err != nil {
 		return nil, err
 	}
 

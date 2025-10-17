@@ -10,6 +10,15 @@ linters:
   default: all
   disable:
     # Project specific linters
+    - testableexamples
+    - exhaustive
+    - errname
+    - testpackage
+    - paralleltest
+    - staticcheck
+    - forcetypeassert
+    - forbidigo
+    - godoclint
     - wsl_v5
     # Discouraged linters
     - noinlineerr # Disallows inline error handling (`if err := ...; err != nil {`).
@@ -53,10 +62,16 @@ linters:
 
   # https://golangci-lint.run/docs/linters/
   settings:
+    # https://golangci-lint.run/docs/linters/configuration/#gocritic
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+        - singleCaseSwitch
     # https://golangci-lint.run/docs/linters/configuration/#gosec
     gosec:
       severity: medium
       confidence: medium
+    # https://golangci-lint.run/docs/linters/configuration/#revive
     revive:
       rules:
         - name: unused-parameter
