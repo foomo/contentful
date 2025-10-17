@@ -153,6 +153,12 @@ This is a project created for demo purposes and not officially supported, so if 
 
 [WIP]
 
+## How to Contribute
+
+Please refer to the [CONTRIBUTING](.github/CONTRIBUTING.md) details and follow the [CODE_OF_CONDUCT](.github/CODE_OF_CONDUCT.md) and [SECURITY](.github/SECURITY.md) guidelines.
+
 ## License
 
-MIT
+Distributed under MIT License, please see license file within the code for more details.
+
+_Made with ♥ [foomo](https://www.foomo.org) by [bestbytes](https://www.bestbytes.com)_
