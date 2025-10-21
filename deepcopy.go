@@ -11,7 +11,7 @@ var buffers = sync.Pool{
 	New: func() interface{} { return new(bytes.Buffer) },
 }
 
-func DeepCopy[T any](dst *T, src T) error {
+func DeepCopy[S, T any](dst *S, src T) error {
 	buf, ok := buffers.Get().(*bytes.Buffer)
 	if !ok {
 		return errors.New("could not get buffer from pool")
