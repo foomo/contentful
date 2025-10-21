@@ -97,7 +97,7 @@ func (v *FieldValidationDimension) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON for custom json unmarshaling
 func (v *FieldValidationDimension) UnmarshalJSON(data []byte) error {
 	payload := map[string]interface{}{}
-	if err := json.Unmarshal(data, &payload); err != nil {
+	if err := Unmarshal(data, &payload); err != nil {
 		return err
 	}
 
@@ -185,7 +185,7 @@ func (v *FieldValidationDate) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON for custom json unmarshaling
 func (v *FieldValidationDate) UnmarshalJSON(data []byte) error {
 	payload := map[string]interface{}{}
-	if err := json.Unmarshal(data, &payload); err != nil {
+	if err := Unmarshal(data, &payload); err != nil {
 		return err
 	}
 

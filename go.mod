@@ -1,10 +1,9 @@
 module github.com/foomo/contentful
 
-go 1.24
+go 1.25
 
 require (
 	github.com/aoliveti/curling v1.1.0
-	github.com/goccy/go-json v0.10.5
 	github.com/stretchr/testify v1.11.1
 )
 

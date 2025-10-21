@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -67,7 +66,7 @@ type Field struct {
 // UnmarshalJSON for custom json unmarshaling
 func (field *Field) UnmarshalJSON(data []byte) error {
 	payload := map[string]interface{}{}
-	if err := json.Unmarshal(data, &payload); err != nil {
+	if err := Unmarshal(data, &payload); err != nil {
 		return err
 	}
 
@@ -88,13 +87,8 @@ func (field *Field) UnmarshalJSON(data []byte) error {
 	}
 
 	if val, ok := payload["items"]; ok {
-		byteArray, err := json.Marshal(val)
-		if err != nil {
-			return err
-		}
-
 		var fieldTypeArrayItem FieldTypeArrayItem
-		if err := json.Unmarshal(byteArray, &fieldTypeArrayItem); err != nil {
+		if err := DeepCopy(&fieldTypeArrayItem, val); err != nil {
 			return err
 		}
 
@@ -131,32 +125,32 @@ func (field *Field) UnmarshalJSON(data []byte) error {
 
 // ParseValidations converts json representation to go struct
 func ParseValidations(data []interface{}) ([]FieldValidation, error) {
-	var err error
 	var validations []FieldValidation
 	for _, value := range data {
+		buf, done := Buffer()
 		var validation map[string]interface{}
-		var byteArray []byte
 
 		if validationStr, ok := value.(string); ok {
-			if err := json.Unmarshal([]byte(validationStr), &validation); err != nil {
+			buf.WriteString(validationStr)
+			if err := Decode(buf, &validation); err != nil {
+				done()
 				return nil, err
 			}
-
-			byteArray = []byte(validationStr)
 		}
 
 		if validationMap, ok := value.(map[string]interface{}); ok {
-			byteArray, err = json.Marshal(validationMap)
-			if err != nil {
+			buf.Reset()
+			if err := Encode(buf, validationMap); err != nil {
+				done()
 				return nil, err
 			}
-
 			validation = validationMap
 		}
 
 		if _, ok := validation["linkContentType"]; ok {
 			var fieldValidationLink FieldValidationLink
-			if err := json.Unmarshal(byteArray, &fieldValidationLink); err != nil {
+			if err := Decode(buf, &fieldValidationLink); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -165,7 +159,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["linkMimetypeGroup"]; ok {
 			var fieldValidationMimeType FieldValidationMimeType
-			if err := json.Unmarshal(byteArray, &fieldValidationMimeType); err != nil {
+			if err := Decode(buf, &fieldValidationMimeType); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -174,7 +169,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["assetImageDimensions"]; ok {
 			var fieldValidationDimension FieldValidationDimension
-			if err := json.Unmarshal(byteArray, &fieldValidationDimension); err != nil {
+			if err := Decode(buf, &fieldValidationDimension); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -183,7 +179,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["assetFileSize"]; ok {
 			var fieldValidationFileSize FieldValidationFileSize
-			if err := json.Unmarshal(byteArray, &fieldValidationFileSize); err != nil {
+			if err := Decode(buf, &fieldValidationFileSize); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -192,7 +189,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["unique"]; ok {
 			var fieldValidationUnique FieldValidationUnique
-			if err := json.Unmarshal(byteArray, &fieldValidationUnique); err != nil {
+			if err := Decode(buf, &fieldValidationUnique); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -201,7 +199,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["in"]; ok {
 			var fieldValidationPredefinedValues FieldValidationPredefinedValues
-			if err := json.Unmarshal(byteArray, &fieldValidationPredefinedValues); err != nil {
+			if err := Decode(buf, &fieldValidationPredefinedValues); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -210,7 +209,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["range"]; ok {
 			var fieldValidationRange FieldValidationRange
-			if err := json.Unmarshal(byteArray, &fieldValidationRange); err != nil {
+			if err := Decode(buf, &fieldValidationRange); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -219,7 +219,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["dateRange"]; ok {
 			var fieldValidationDate FieldValidationDate
-			if err := json.Unmarshal(byteArray, &fieldValidationDate); err != nil {
+			if err := Decode(buf, &fieldValidationDate); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -228,7 +229,8 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["size"]; ok {
 			var fieldValidationSize FieldValidationSize
-			if err := json.Unmarshal(byteArray, &fieldValidationSize); err != nil {
+			if err := Decode(buf, &fieldValidationSize); err != nil {
+				done()
 				return nil, err
 			}
 
@@ -237,12 +239,14 @@ func ParseValidations(data []interface{}) ([]FieldValidation, error) {
 
 		if _, ok := validation["regexp"]; ok {
 			var fieldValidationRegex FieldValidationRegex
-			if err := json.Unmarshal(byteArray, &fieldValidationRegex); err != nil {
+			if err := Decode(buf, &fieldValidationRegex); err != nil {
+				done()
 				return nil, err
 			}
 
 			validations = append(validations, fieldValidationRegex)
 		}
+		done()
 	}
 
 	return validations, nil
@@ -258,7 +262,7 @@ type FieldTypeArrayItem struct {
 // UnmarshalJSON for custom json unmarshaling
 func (item *FieldTypeArrayItem) UnmarshalJSON(data []byte) error {
 	payload := map[string]interface{}{}
-	if err := json.Unmarshal(data, &payload); err != nil {
+	if err := Unmarshal(data, &payload); err != nil {
 		return err
 	}
 
@@ -327,7 +331,7 @@ func (service *ContentTypesService) Get(ctx context.Context, spaceID, contentTyp
 
 // Upsert updates or creates a new content type
 func (service *ContentTypesService) Upsert(ctx context.Context, spaceID string, ct *ContentType) error {
-	bytesArray, err := json.Marshal(ct)
+	bytesArray, err := Marshal(ct)
 	if err != nil {
 		return err
 	}
