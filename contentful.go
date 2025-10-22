@@ -249,7 +249,7 @@ func (c *Contentful) do(req *http.Request, v any) error {
 
 	time.Sleep(time.Second * time.Duration(waitSeconds))
 
-	return c.do(req, &v)
+	return c.do(req, v)
 }
 
 func (c *Contentful) handleError(req *http.Request, res *http.Response) error {
