@@ -73,16 +73,16 @@ func (asset *Asset) GetVersion() int {
 }
 
 // List returns asset collection
-func (service *AssetsService) List(ctx context.Context, spaceID string) *Collection[*Asset] {
+func (service *AssetsService) List(ctx context.Context, spaceID string) *Collection[Asset] {
 	path := fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection[*Asset]{}
+		return &Collection[Asset]{}
 	}
 
-	col := NewCollection[*Asset](&CollectionOptions{})
+	col := NewCollection[Asset](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 

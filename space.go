@@ -41,10 +41,10 @@ func (space *Space) GetVersion() int {
 }
 
 // List creates a spaces collection
-func (service *SpacesService) List(ctx context.Context) *Collection[*Space] {
+func (service *SpacesService) List(ctx context.Context) *Collection[Space] {
 	req, _ := service.c.newRequest(ctx, http.MethodGet, "/spaces", nil, nil, nil)
 
-	col := NewCollection[*Space](&CollectionOptions{})
+	col := NewCollection[Space](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 

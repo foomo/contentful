@@ -10,15 +10,15 @@ import (
 	"strconv"
 )
 
-// CustomService servıce
-type CustomService[T any] service
+// ContentTypeService servıce
+type ContentTypeService[T any] service
 
-func NewCustomService[T any](c *Contentful) *CustomService[T] {
-	return &CustomService[T]{c: c}
+func NewContentTypeService[T any](c *Contentful) *ContentTypeService[T] {
+	return &ContentTypeService[T]{c: c}
 }
 
 // GetEntryKey returns the entry's keys
-func (service *CustomService[T]) GetEntryKey(ctx context.Context, entry T, key string) (*EntryField, error) {
+func (service *ContentTypeService[T]) GetEntryKey(ctx context.Context, entry *T, key string) (*EntryField, error) {
 	var base Entry
 	if err := DeepCopy(&base, entry); err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (service *CustomService[T]) GetEntryKey(ctx context.Context, entry T, key s
 }
 
 // List returns entries collection
-func (service *CustomService[T]) List(ctx context.Context, spaceID string) *Collection[T] {
+func (service *ContentTypeService[T]) List(ctx context.Context, spaceID string) *Collection[T] {
 	path := fmt.Sprintf("/spaces/%s%s/entries", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
@@ -68,7 +68,7 @@ func (service *CustomService[T]) List(ctx context.Context, spaceID string) *Coll
 }
 
 // Sync returns entries collection
-func (service *CustomService[T]) Sync(ctx context.Context, spaceID string, initial bool, syncToken ...string) *Collection[T] {
+func (service *ContentTypeService[T]) Sync(ctx context.Context, spaceID string, initial bool, syncToken ...string) *Collection[T] {
 	path := fmt.Sprintf("/spaces/%s%s/sync", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
@@ -91,7 +91,7 @@ func (service *CustomService[T]) Sync(ctx context.Context, spaceID string, initi
 }
 
 // Get returns a single entry
-func (service *CustomService[T]) Get(ctx context.Context, spaceID, entryID string, locale ...string) (T, error) {
+func (service *ContentTypeService[T]) Get(ctx context.Context, spaceID, entryID string, locale ...string) (T, error) {
 	var entry T
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s", spaceID, getEnvPath(service.c), entryID)
 	query := url.Values{}
@@ -113,7 +113,7 @@ func (service *CustomService[T]) Get(ctx context.Context, spaceID, entryID strin
 }
 
 // Delete the entry
-func (service *CustomService[T]) Delete(ctx context.Context, spaceID string, entryID string) error {
+func (service *ContentTypeService[T]) Delete(ctx context.Context, spaceID string, entryID string) error {
 	path := fmt.Sprintf("/spaces/%s%s/entries/%s", spaceID, getEnvPath(service.c), entryID)
 	method := http.MethodDelete
 
@@ -126,7 +126,7 @@ func (service *CustomService[T]) Delete(ctx context.Context, spaceID string, ent
 }
 
 // Upsert updates or creates a new entry
-func (service *CustomService[T]) Upsert(ctx context.Context, spaceID string, entry T) error {
+func (service *ContentTypeService[T]) Upsert(ctx context.Context, spaceID string, entry *T) error {
 	var base Entry
 	if err := DeepCopy(&base, entry); err != nil {
 		return err
@@ -169,7 +169,7 @@ func (service *CustomService[T]) Upsert(ctx context.Context, spaceID string, ent
 }
 
 // Publish the entry
-func (service *CustomService[T]) Publish(ctx context.Context, spaceID string, entry T) error {
+func (service *ContentTypeService[T]) Publish(ctx context.Context, spaceID string, entry *T) error {
 	var base Entry
 	if err := DeepCopy(&base, entry); err != nil {
 		return err
@@ -188,7 +188,7 @@ func (service *CustomService[T]) Publish(ctx context.Context, spaceID string, en
 }
 
 // Unpublish the entry
-func (service *CustomService[T]) Unpublish(ctx context.Context, spaceID string, entry T) error {
+func (service *ContentTypeService[T]) Unpublish(ctx context.Context, spaceID string, entry *T) error {
 	var base Entry
 	if err := DeepCopy(&base, entry); err != nil {
 		return err
@@ -208,7 +208,7 @@ func (service *CustomService[T]) Unpublish(ctx context.Context, spaceID string, 
 }
 
 // Publish the entry
-func (service *CustomService[T]) Archive(ctx context.Context, spaceID string, entry T) error {
+func (service *ContentTypeService[T]) Archive(ctx context.Context, spaceID string, entry *T) error {
 	var base Entry
 	if err := DeepCopy(&base, entry); err != nil {
 		return err

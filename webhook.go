@@ -40,16 +40,16 @@ func (webhook *Webhook) GetVersion() int {
 }
 
 // List returns webhooks collection
-func (service *WebhooksService) List(ctx context.Context, spaceID string) *Collection[*Webhook] {
+func (service *WebhooksService) List(ctx context.Context, spaceID string) *Collection[Webhook] {
 	path := fmt.Sprintf("/spaces/%s%s/webhook_definitions", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection[*Webhook]{}
+		return &Collection[Webhook]{}
 	}
 
-	col := NewCollection[*Webhook](&CollectionOptions{})
+	col := NewCollection[Webhook](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 

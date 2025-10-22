@@ -297,7 +297,7 @@ func (ct *ContentType) GetVersion() int {
 }
 
 // List return a content type collection
-func (service *ContentTypesService) List(ctx context.Context, spaceID string) *Collection[*ContentType] {
+func (service *ContentTypesService) List(ctx context.Context, spaceID string) *Collection[ContentType] {
 	path := fmt.Sprintf("/spaces/%s%s/content_types", spaceID, getEnvPath(service.c))
 
 	req, err := service.c.newRequest(ctx, http.MethodGet, path, nil, nil, nil)
@@ -305,7 +305,7 @@ func (service *ContentTypesService) List(ctx context.Context, spaceID string) *C
 		return nil
 	}
 
-	col := NewCollection[*ContentType](&CollectionOptions{})
+	col := NewCollection[ContentType](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 

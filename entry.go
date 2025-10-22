@@ -59,16 +59,16 @@ func (service *EntriesService) GetEntryKey(ctx context.Context, entry *Entry, ke
 }
 
 // List returns entries collection
-func (service *EntriesService) List(ctx context.Context, spaceID string) *Collection[*Entry] {
+func (service *EntriesService) List(ctx context.Context, spaceID string) *Collection[Entry] {
 	path := fmt.Sprintf("/spaces/%s%s/entries", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection[*Entry]{}
+		return &Collection[Entry]{}
 	}
 
-	col := NewCollection[*Entry](&CollectionOptions{})
+	col := NewCollection[Entry](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -76,16 +76,16 @@ func (service *EntriesService) List(ctx context.Context, spaceID string) *Collec
 }
 
 // Sync returns entries collection
-func (service *EntriesService) Sync(ctx context.Context, spaceID string, initial bool, syncToken ...string) *Collection[*Entry] {
+func (service *EntriesService) Sync(ctx context.Context, spaceID string, initial bool, syncToken ...string) *Collection[Entry] {
 	path := fmt.Sprintf("/spaces/%s%s/sync", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection[*Entry]{}
+		return &Collection[Entry]{}
 	}
 
-	col := NewCollection[*Entry](&CollectionOptions{})
+	col := NewCollection[Entry](&CollectionOptions{})
 	if initial {
 		col.Initial("true")
 	}

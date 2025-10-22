@@ -17,16 +17,16 @@ type Tag struct {
 }
 
 // List returns tags collection
-func (service *TagsService) List(ctx context.Context, spaceID string) *Collection[*Tag] {
+func (service *TagsService) List(ctx context.Context, spaceID string) *Collection[Tag] {
 	path := fmt.Sprintf("/spaces/%s%s/tags", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection[*Tag]{}
+		return &Collection[Tag]{}
 	}
 
-	col := NewCollection[*Tag](&CollectionOptions{})
+	col := NewCollection[Tag](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
