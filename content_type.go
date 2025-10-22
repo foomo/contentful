@@ -281,6 +281,8 @@ func (item *FieldTypeArrayItem) UnmarshalJSON(data []byte) error {
 
 	if val, ok := payload["linktype"]; ok {
 		item.LinkType = val.(string)
+	} else if val, ok := payload["linkType"]; ok {
+		item.LinkType = val.(string)
 	}
 
 	return nil
