@@ -323,12 +323,12 @@ func (service *ContentTypesService) Get(ctx context.Context, spaceID, contentTyp
 		return nil, err
 	}
 
-	var ct ContentType
+	var ct *ContentType
 	if err = service.c.do(req, &ct); err != nil {
 		return nil, err
 	}
 
-	return &ct, nil
+	return ct, nil
 }
 
 // Upsert updates or creates a new content type
@@ -356,7 +356,7 @@ func (service *ContentTypesService) Upsert(ctx context.Context, spaceID string, 
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(ct.GetVersion()))
 
-	return service.c.do(req, ct)
+	return service.c.do(req, &ct)
 }
 
 // Delete the content_type
@@ -384,10 +384,9 @@ func (service *ContentTypesService) Activate(ctx context.Context, spaceID string
 		return err
 	}
 
-	version := strconv.Itoa(ct.Sys.Version)
-	req.Header.Set("X-Contentful-Version", version)
+	req.Header.Set("X-Contentful-Version", strconv.Itoa(ct.GetVersion()))
 
-	return service.c.do(req, ct)
+	return service.c.do(req, &ct)
 }
 
 // Deactivate the contenttype, a.k.a unpublish
@@ -399,8 +398,7 @@ func (service *ContentTypesService) Deactivate(ctx context.Context, spaceID stri
 		return err
 	}
 
-	version := strconv.Itoa(ct.Sys.Version)
-	req.Header.Set("X-Contentful-Version", version)
+	req.Header.Set("X-Contentful-Version", strconv.Itoa(ct.GetVersion()))
 
-	return service.c.do(req, ct)
+	return service.c.do(req, &ct)
 }

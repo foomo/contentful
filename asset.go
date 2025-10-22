@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -152,7 +151,7 @@ func (asset *Asset) GetLocalized() *AssetNoLocale {
 
 // Upsert updates or creates a new asset entity
 func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset *Asset) error {
-	bytesArray, err := json.Marshal(asset)
+	bytesArray, err := Marshal(asset)
 	if err != nil {
 		return err
 	}
@@ -175,7 +174,7 @@ func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset 
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(asset.GetVersion()))
 
-	return service.c.do(req, asset)
+	return service.c.do(req, &asset)
 }
 
 // Delete sends delete request
@@ -230,7 +229,7 @@ func (service *AssetsService) Publish(ctx context.Context, spaceID string, asset
 	version := strconv.Itoa(asset.Sys.Version)
 	req.Header.Set("X-Contentful-Version", version)
 
-	return service.c.do(req, asset)
+	return service.c.do(req, &asset)
 }
 
 // Unpublish unpublishes the asset
@@ -246,5 +245,5 @@ func (service *AssetsService) Unpublish(ctx context.Context, spaceID string, ass
 	version := strconv.Itoa(asset.Sys.Version)
 	req.Header.Set("X-Contentful-Version", version)
 
-	return service.c.do(req, asset)
+	return service.c.do(req, &asset)
 }

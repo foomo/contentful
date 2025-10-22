@@ -23,9 +23,9 @@ func (service *UploadService) Uploads(ctx context.Context, spaceID string, file 
 	if err != nil {
 		return nil, err
 	}
-	var uploadResponse Upload
+	var uploadResponse *Upload
 	if err := service.c.do(req, &uploadResponse); err != nil {
 		return nil, err
 	}
-	return &uploadResponse, nil
+	return uploadResponse, nil
 }

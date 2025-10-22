@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -136,7 +135,7 @@ func (service *ContentTypeService[T]) Upsert(ctx context.Context, spaceID string
 		"fields": base.Fields,
 	}
 
-	bytesArray, err := json.Marshal(fieldsOnly)
+	bytesArray, err := Marshal(fieldsOnly)
 	if err != nil {
 		return err
 	}
@@ -165,7 +164,7 @@ func (service *ContentTypeService[T]) Upsert(ctx context.Context, spaceID string
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(base.GetVersion()))
 	req.Header.Set("X-Contentful-Content-Type", base.Sys.ContentType.Sys.ID)
 
-	return service.c.do(req, entry)
+	return service.c.do(req, &entry)
 }
 
 // Publish the entry

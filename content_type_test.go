@@ -136,7 +136,7 @@ func ExampleContentTypesService_Delete_allDrafts() {
 
 	for _, contentType := range collection.Items {
 		if contentType.Sys.PublishedAt == "" {
-			err := cma.ContentTypes.Delete(context.TODO(), "space-id", contentType)
+			err := cma.ContentTypes.Delete(context.TODO(), "space-id", &contentType)
 			if err != nil {
 				log.Fatal(err)
 			}

@@ -201,7 +201,7 @@ func (c *Contentful) newRequest(ctx context.Context, method, requestPath string,
 	return req, nil
 }
 
-func (c *Contentful) do(req *http.Request, v interface{}) error {
+func (c *Contentful) do(req *http.Request, v any) error {
 	if c.Debug {
 		if cmd, err := curling.NewFromRequest(req); err == nil {
 			fmt.Println(cmd)
@@ -249,7 +249,7 @@ func (c *Contentful) do(req *http.Request, v interface{}) error {
 
 	time.Sleep(time.Second * time.Duration(waitSeconds))
 
-	return c.do(req, v)
+	return c.do(req, &v)
 }
 
 func (c *Contentful) handleError(req *http.Request, res *http.Response) error {

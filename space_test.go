@@ -88,7 +88,7 @@ func ExampleSpacesService_Delete_all() {
 	}
 
 	for _, space := range collection.Items {
-		err := cma.Spaces.Delete(context.TODO(), space)
+		err := cma.Spaces.Delete(context.TODO(), &space)
 		if err != nil {
 			log.Fatal(err)
 		}

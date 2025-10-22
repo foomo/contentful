@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -109,15 +108,15 @@ func (service *EntriesService) Get(ctx context.Context, spaceID, entryID string,
 
 	req, err := service.c.newRequest(ctx, method, path, query, nil, nil)
 	if err != nil {
-		return &Entry{}, err
+		return nil, err
 	}
 
-	var entry Entry
+	var entry *Entry
 	if err := service.c.do(req, &entry); err != nil {
 		return nil, err
 	}
 
-	return &entry, err
+	return entry, nil
 }
 
 // Delete the entry
@@ -139,7 +138,7 @@ func (service *EntriesService) Upsert(ctx context.Context, spaceID string, entry
 		"fields": entry.Fields,
 	}
 
-	bytesArray, err := json.Marshal(fieldsOnly)
+	bytesArray, err := Marshal(fieldsOnly)
 	if err != nil {
 		return err
 	}
@@ -168,7 +167,7 @@ func (service *EntriesService) Upsert(ctx context.Context, spaceID string, entry
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(entry.GetVersion()))
 	req.Header.Set("X-Contentful-Content-Type", entry.Sys.ContentType.Sys.ID)
 
-	return service.c.do(req, entry)
+	return service.c.do(req, &entry)
 }
 
 // Publish the entry

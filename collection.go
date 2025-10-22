@@ -74,7 +74,7 @@ func (col *Collection[T]) Next() (*Collection[T], error) {
 	col.req.URL.RawQuery = col.String()
 
 	// makes api call
-	err := col.c.do(col.req, col)
+	err := col.c.do(col.req, &col)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (col *Collection[T]) Get() (*Collection[T], error) {
 	// override request query
 	col.req.URL.RawQuery = col.String()
 	// makes api call
-	err := col.c.do(col.req, col)
+	err := col.c.do(col.req, &col)
 	if err != nil {
 		return nil, err
 	}

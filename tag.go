@@ -47,10 +47,10 @@ func (service *TagsService) Get(ctx context.Context, spaceID, tagID string, loca
 		return &Tag{}, err
 	}
 
-	var tag Tag
+	var tag *Tag
 	if err := service.c.do(req, &tag); err != nil {
 		return nil, err
 	}
 
-	return &tag, err
+	return tag, err
 }

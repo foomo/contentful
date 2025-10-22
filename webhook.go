@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -66,17 +65,17 @@ func (service *WebhooksService) Get(ctx context.Context, spaceID, webhookID stri
 		return nil, err
 	}
 
-	var webhook Webhook
+	var webhook *Webhook
 	if err := service.c.do(req, &webhook); err != nil {
 		return nil, err
 	}
 
-	return &webhook, nil
+	return webhook, nil
 }
 
 // Upsert updates or creates a new entity
 func (service *WebhooksService) Upsert(ctx context.Context, spaceID string, webhook *Webhook) error {
-	bytesArray, err := json.Marshal(webhook)
+	bytesArray, err := Marshal(webhook)
 	if err != nil {
 		return err
 	}
@@ -99,7 +98,7 @@ func (service *WebhooksService) Upsert(ctx context.Context, spaceID string, webh
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(webhook.GetVersion()))
 
-	return service.c.do(req, webhook)
+	return service.c.do(req, &webhook)
 }
 
 // Delete the webhook

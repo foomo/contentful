@@ -91,7 +91,7 @@ func (service *APIKeyService) Get(ctx context.Context, spaceID, apiKeyID string)
 
 // Upsert updates or creates a new api key entity
 func (service *APIKeyService) Upsert(ctx context.Context, spaceID string, apiKey *APIKey) error {
-	bytesArray, err := json.Marshal(apiKey)
+	bytesArray, err := Marshal(apiKey)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (service *APIKeyService) Upsert(ctx context.Context, spaceID string, apiKey
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(apiKey.GetVersion()))
 
-	return service.c.do(req, apiKey)
+	return service.c.do(req, &apiKey)
 }
 
 // Delete deletes a sinlge api key entity
