@@ -18,8 +18,8 @@ type Includes struct {
 	Asset map[string]interface{} `json:"Asset"`
 }
 
-// Collection model
-type Collection struct {
+// Collection model with generic type parameter for Items
+type Collection[T any] struct {
 	Query
 	c           *Contentful
 	req         *http.Request
@@ -28,7 +28,7 @@ type Collection struct {
 	Total       int                    `json:"total"`
 	Skip        int                    `json:"skip"`
 	Limit       uint16                 `json:"limit"`
-	Items       []interface{}          `json:"items"`
+	Items       []T                    `json:"items"`
 	Includes    map[string]interface{} `json:"includes"`
 	NextSyncURL string                 `json:"nextSyncUrl"`
 	NextPageURL string                 `json:"nextPageUrl"`
@@ -43,8 +43,8 @@ type Collection struct {
 
 var syncTokenRegex = regexp.MustCompile(`sync_token=([a-zA-Z0-9_\-]+)`)
 
-// NewCollection initializes a new collection
-func NewCollection(options *CollectionOptions) *Collection {
+// NewCollection initializes a new generic collection
+func NewCollection[T any](options *CollectionOptions) *Collection[T] {
 	query := NewQuery()
 	limit := uint16(100)
 	if options.Limit > 0 {
@@ -52,7 +52,7 @@ func NewCollection(options *CollectionOptions) *Collection {
 	}
 	query.Limit(limit)
 
-	return &Collection{
+	return &Collection[T]{
 		Query: *query,
 		page:  1,
 		Limit: limit,
@@ -60,42 +60,50 @@ func NewCollection(options *CollectionOptions) *Collection {
 }
 
 // Next makes the col.req
-func (col *Collection) Next() (*Collection, error) {
+func (col *Collection[T]) Next() (*Collection[T], error) {
 	// setup query params
 	if col.SyncToken != "" {
 		col.Query = *NewQuery()
 		col.Query.SyncToken(col.SyncToken)
 	} else {
-		skip := col.Query.limit * (col.page - 1)
+		skip := col.limit * (col.page - 1)
 		col.Query.Skip(skip)
 	}
 
 	// override request query
-	col.req.URL.RawQuery = col.Query.String()
+	col.req.URL.RawQuery = col.String()
+
+	// create copy
+	ret := Collection[T]{
+		Query: col.Query,
+		c:     col.c,
+		req:   col.req,
+		page:  col.page,
+	}
 
 	// makes api call
-	err := col.c.do(col.req, col)
+	err := col.c.do(col.req, &ret)
 	if err != nil {
 		return nil, err
 	}
 
-	col.page++
-	if col.NextPageURL != "" {
-		syncToken := syncTokenRegex.FindStringSubmatch(col.NextPageURL)
-		col.SyncToken = syncToken[1]
-	} else if col.NextSyncURL != "" {
-		syncToken := syncTokenRegex.FindStringSubmatch(col.NextSyncURL)
-		col.SyncToken = syncToken[1]
+	ret.page++
+	if ret.NextPageURL != "" {
+		syncToken := syncTokenRegex.FindStringSubmatch(ret.NextPageURL)
+		ret.SyncToken = syncToken[1]
+	} else if ret.NextSyncURL != "" {
+		syncToken := syncTokenRegex.FindStringSubmatch(ret.NextSyncURL)
+		ret.SyncToken = syncToken[1]
 	}
-	return col, nil
+	return &ret, nil
 }
 
 // Get makes the col.req with no automatic pagination
-func (col *Collection) Get() (*Collection, error) {
+func (col *Collection[T]) Get() (*Collection[T], error) {
 	// override request query
-	col.req.URL.RawQuery = col.Query.String()
+	col.req.URL.RawQuery = col.String()
 	// makes api call
-	err := col.c.do(col.req, col)
+	err := col.c.do(col.req, &col)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +112,8 @@ func (col *Collection) Get() (*Collection, error) {
 }
 
 // GetAll paginates and returns all items - beware of memory usage!
-func (col *Collection) GetAll() (*Collection, error) {
-	var allItems []interface{}
+func (col *Collection[T]) GetAll() (*Collection[T], error) {
+	var allItems []T
 	col.Query.Limit(col.Limit)
 	for {
 		var errNext error
@@ -122,113 +130,8 @@ func (col *Collection) GetAll() (*Collection, error) {
 	return col, nil
 }
 
-// ToContentType cast Items to ContentType model
-func (col *Collection) ToContentType() ([]*ContentType, error) {
-	var contentTypes []*ContentType
-
-	byteArray, err := json.Marshal(col.Items)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&contentTypes); err != nil {
-		return nil, err
-	}
-
-	return contentTypes, nil
-}
-
-// ToSpace cast Items to Space model
-func (col *Collection) ToSpace() ([]*Space, error) {
-	var spaces []*Space
-
-	byteArray, err := json.Marshal(col.Items)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&spaces); err != nil {
-		return nil, err
-	}
-
-	return spaces, nil
-}
-
-// ToEntry cast Items to Entry model
-func (col *Collection) ToEntry() ([]*Entry, error) {
-	var entries []*Entry
-
-	byteArray, err := json.Marshal(col.Items)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&entries); err != nil {
-		return nil, err
-	}
-
-	return entries, nil
-}
-
-// ToLocale cast Items to Locale model
-func (col *Collection) ToLocale() ([]*Locale, error) {
-	var locales []*Locale
-
-	byteArray, err := json.Marshal(col.Items)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&locales); err != nil {
-		return nil, err
-	}
-
-	return locales, nil
-}
-
-// ToAsset cast Items to Asset model
-func (col *Collection) ToAsset() ([]*Asset, error) {
-	var assets []*Asset
-
-	byteArray, err := json.Marshal(col.Items)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&assets); err != nil {
-		return nil, err
-	}
-
-	return assets, nil
-}
-
-// ToAPIKey cast Items to APIKey model
-func (col *Collection) ToAPIKey() ([]*APIKey, error) {
-	var apiKeys []*APIKey
-
-	byteArray, err := json.Marshal(col.Items)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&apiKeys); err != nil {
-		return nil, err
-	}
-
-	return apiKeys, nil
-}
-
-// ToWebhook cast Items to Webhook model
-func (col *Collection) ToWebhook() ([]*Webhook, error) {
-	var webhooks []*Webhook
-
-	byteArray, err := json.Marshal(col.Items)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(bytes.NewReader(byteArray)).Decode(&webhooks); err != nil {
-		return nil, err
-	}
-
-	return webhooks, nil
-}
-
 // ToIncludesEntry cast includesEntry to Entry model
-func (col *Collection) ToIncludesEntry() ([]*Entry, error) {
+func (col *Collection[T]) ToIncludesEntry() ([]*Entry, error) {
 	var includesEntry []*Entry
 
 	byteArray, err := json.Marshal(col.Includes["Entry"])
@@ -243,7 +146,7 @@ func (col *Collection) ToIncludesEntry() ([]*Entry, error) {
 }
 
 // ToIncludesEntryMap returns a map of Entry's from the Includes
-func (col *Collection) ToIncludesEntryMap() (map[string]*Entry, error) {
+func (col *Collection[T]) ToIncludesEntryMap() (map[string]*Entry, error) {
 	var includesEntry []*Entry
 	includesEntryMap := make(map[string]*Entry)
 
@@ -262,7 +165,7 @@ func (col *Collection) ToIncludesEntryMap() (map[string]*Entry, error) {
 }
 
 // ToIncludesAsset cast includesAsset to Asset model
-func (col *Collection) ToIncludesAsset() ([]*IncludeAsset, error) {
+func (col *Collection[T]) ToIncludesAsset() ([]*IncludeAsset, error) {
 	var includesAsset []*IncludeAsset
 
 	byteArray, err := json.Marshal(col.Includes["Asset"])
@@ -276,7 +179,7 @@ func (col *Collection) ToIncludesAsset() ([]*IncludeAsset, error) {
 }
 
 // ToIncludesAssetMap returns a map of Asset's from the Includes
-func (col *Collection) ToIncludesAssetMap() (map[string]*IncludeAsset, error) {
+func (col *Collection[T]) ToIncludesAssetMap() (map[string]*IncludeAsset, error) {
 	var includesAsset []*IncludeAsset
 	includesAssetMap := make(map[string]*IncludeAsset)
 
@@ -295,7 +198,7 @@ func (col *Collection) ToIncludesAssetMap() (map[string]*IncludeAsset, error) {
 }
 
 // ToIncludesLocalizedAssetMap returns a map of Asset's from the Includes
-func (col *Collection) ToIncludesLocalizedAssetMap() (map[string]*Asset, error) {
+func (col *Collection[T]) ToIncludesLocalizedAssetMap() (map[string]*Asset, error) {
 	var includesAsset []*Asset
 	includesAssetMap := make(map[string]*Asset)
 

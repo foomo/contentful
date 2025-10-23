@@ -55,16 +55,16 @@ func (apiKey *APIKey) GetVersion() int {
 }
 
 // List returns all api keys collection
-func (service *APIKeyService) List(ctx context.Context, spaceID string) *Collection {
+func (service *APIKeyService) List(ctx context.Context, spaceID string) *Collection[APIKey] {
 	path := fmt.Sprintf("/spaces/%s%s/api_keys", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[APIKey]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[APIKey](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -91,7 +91,7 @@ func (service *APIKeyService) Get(ctx context.Context, spaceID, apiKeyID string)
 
 // Upsert updates or creates a new api key entity
 func (service *APIKeyService) Upsert(ctx context.Context, spaceID string, apiKey *APIKey) error {
-	bytesArray, err := json.Marshal(apiKey)
+	bytesArray, err := Marshal(apiKey)
 	if err != nil {
 		return err
 	}
@@ -101,10 +101,10 @@ func (service *APIKeyService) Upsert(ctx context.Context, spaceID string, apiKey
 
 	if apiKey.Sys != nil && apiKey.Sys.CreatedAt != "" {
 		path = fmt.Sprintf("/spaces/%s%s/api_keys/%s", spaceID, getEnvPath(service.c), apiKey.Sys.ID)
-		method = "PUT"
+		method = http.MethodPut
 	} else {
 		path = fmt.Sprintf("/spaces/%s%s/api_keys", spaceID, getEnvPath(service.c))
-		method = "POST"
+		method = http.MethodPost
 	}
 
 	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
@@ -114,7 +114,7 @@ func (service *APIKeyService) Upsert(ctx context.Context, spaceID string, apiKey
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(apiKey.GetVersion()))
 
-	return service.c.do(req, apiKey)
+	return service.c.do(req, &apiKey)
 }
 
 // Delete deletes a sinlge api key entity

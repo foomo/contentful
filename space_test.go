@@ -18,7 +18,7 @@ func ExampleSpacesService_Get() {
 
 	space, err := cma.Spaces.Get(context.TODO(), "space-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	fmt.Println(space.Name)
@@ -28,15 +28,10 @@ func ExampleSpacesService_List() {
 	cma := NewCMA("cma-token")
 	collection, err := cma.Spaces.List(context.TODO()).Next()
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
-	spaces, err := collection.ToSpace()
-	if err != nil {
-		log.Fatal(err) //nolint:revive
-	}
-
-	for _, space := range spaces {
+	for _, space := range collection.Items {
 		fmt.Println(space.Sys.ID, space.Name)
 	}
 }
@@ -51,7 +46,7 @@ func ExampleSpacesService_Upsert_create() {
 
 	err := cma.Spaces.Upsert(context.TODO(), space)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -60,13 +55,13 @@ func ExampleSpacesService_Upsert_update() {
 
 	space, err := cma.Spaces.Get(context.TODO(), "space-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	space.Name = "modified"
 	err = cma.Spaces.Upsert(context.TODO(), space)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -75,12 +70,12 @@ func ExampleSpacesService_Delete() {
 
 	space, err := cma.Spaces.Get(context.TODO(), "space-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	err = cma.Spaces.Delete(context.TODO(), space)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -89,18 +84,13 @@ func ExampleSpacesService_Delete_all() {
 
 	collection, err := cma.Spaces.List(context.TODO()).Next()
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
-	spaces, err := collection.ToSpace()
-	if err != nil {
-		log.Fatal(err) //nolint:revive
-	}
-
-	for _, space := range spaces {
-		err := cma.Spaces.Delete(context.TODO(), space)
+	for _, space := range collection.Items {
+		err := cma.Spaces.Delete(context.TODO(), &space)
 		if err != nil {
-			log.Fatal(err) //nolint:revive
+			log.Fatal(err)
 		}
 	}
 }
@@ -128,7 +118,7 @@ func TestSpacesServiceList(t *testing.T) {
 	collection, err := cma.Spaces.List(context.TODO()).Next()
 	require.NoError(t, err)
 
-	spaces, err := collection.ToSpace()
+	spaces := collection.Items
 	require.NoError(t, err)
 	assert.Len(t, spaces, 2)
 	assert.Equal(t, "id1", spaces[0].Sys.ID)
@@ -168,7 +158,7 @@ func TestSpaceSaveForCreate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "new space", payload["name"])
 		assert.Equal(t, "en", payload["defaultLocale"])
 
@@ -205,7 +195,7 @@ func TestSpaceSaveForUpdate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "changed-space-name", payload["name"])
 		assert.Equal(t, "de", payload["defaultLocale"])
 

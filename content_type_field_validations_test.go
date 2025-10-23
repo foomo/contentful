@@ -19,7 +19,7 @@ func TestFieldValidationLink(t *testing.T) {
 
 	data, err := json.Marshal(validation)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"linkContentType\":[\"test\",\"test2\"]}", string(data))
+	assert.JSONEq(t, "{\"linkContentType\":[\"test\",\"test2\"]}", string(data))
 }
 
 func TestFieldValidationUnique(t *testing.T) {
@@ -44,7 +44,7 @@ func TestFieldValidationPredefinedValues(t *testing.T) {
 
 	data, err := json.Marshal(validation)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"in\":[5,10,\"string\",6.4],\"message\":\"error message\"}", string(data))
+	assert.JSONEq(t, "{\"in\":[5,10,\"string\",6.4],\"message\":\"error message\"}", string(data))
 }
 
 func TestFieldValidationRange(t *testing.T) {
@@ -60,13 +60,13 @@ func TestFieldValidationRange(t *testing.T) {
 	}
 	data, err := json.Marshal(validation)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"range\":{\"min\":60,\"max\":100},\"message\":\"error message\"}", string(data))
+	assert.JSONEq(t, "{\"range\":{\"min\":60,\"max\":100},\"message\":\"error message\"}", string(data))
 
 	var validationCheck FieldValidationRange
 	err = json.NewDecoder(bytes.NewReader(data)).Decode(&validationCheck)
 	require.NoError(t, err)
-	assert.Equal(t, float64(60), validationCheck.Range.Min)
-	assert.Equal(t, float64(100), validationCheck.Range.Max)
+	assert.InDelta(t, float64(60), validationCheck.Range.Min, 0)
+	assert.InDelta(t, float64(100), validationCheck.Range.Max, 0)
 	assert.Equal(t, "error message", validationCheck.ErrorMessage)
 
 	// greater than equal to
@@ -78,12 +78,12 @@ func TestFieldValidationRange(t *testing.T) {
 	}
 	data, err = json.Marshal(validation)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"range\":{\"min\":10},\"message\":\"error message\"}", string(data))
+	assert.JSONEq(t, "{\"range\":{\"min\":10},\"message\":\"error message\"}", string(data))
 	validationCheck = FieldValidationRange{}
 	err = json.NewDecoder(bytes.NewReader(data)).Decode(&validationCheck)
 	require.NoError(t, err)
-	assert.Equal(t, float64(10), validationCheck.Range.Min)
-	assert.Equal(t, float64(0), validationCheck.Range.Max)
+	assert.InDelta(t, float64(10), validationCheck.Range.Min, 0)
+	assert.InDelta(t, float64(0), validationCheck.Range.Max, 0)
 	assert.Equal(t, "error message", validationCheck.ErrorMessage)
 
 	// less than equal to
@@ -95,12 +95,12 @@ func TestFieldValidationRange(t *testing.T) {
 	}
 	data, err = json.Marshal(validation)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"range\":{\"max\":90},\"message\":\"error message\"}", string(data))
+	assert.JSONEq(t, "{\"range\":{\"max\":90},\"message\":\"error message\"}", string(data))
 	validationCheck = FieldValidationRange{}
 	err = json.NewDecoder(bytes.NewReader(data)).Decode(&validationCheck)
 	require.NoError(t, err)
-	assert.Equal(t, float64(90), validationCheck.Range.Max)
-	assert.Equal(t, float64(0), validationCheck.Range.Min)
+	assert.InDelta(t, float64(90), validationCheck.Range.Max, 0)
+	assert.InDelta(t, float64(0), validationCheck.Range.Min, 0)
 	assert.Equal(t, "error message", validationCheck.ErrorMessage)
 }
 
@@ -117,13 +117,13 @@ func TestFieldValidationSize(t *testing.T) {
 	}
 	data, err := json.Marshal(validation)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"size\":{\"min\":4,\"max\":6},\"message\":\"error message\"}", string(data))
+	assert.JSONEq(t, "{\"size\":{\"min\":4,\"max\":6},\"message\":\"error message\"}", string(data))
 
 	var validationCheck FieldValidationSize
 	err = json.NewDecoder(bytes.NewReader(data)).Decode(&validationCheck)
 	require.NoError(t, err)
-	assert.Equal(t, float64(4), validationCheck.Size.Min)
-	assert.Equal(t, float64(6), validationCheck.Size.Max)
+	assert.InDelta(t, float64(4), validationCheck.Size.Min, 0)
+	assert.InDelta(t, float64(6), validationCheck.Size.Max, 0)
 	assert.Equal(t, "error message", validationCheck.ErrorMessage)
 }
 

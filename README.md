@@ -1,8 +1,13 @@
-# contentful-go
-[![Build Status](https://github.com/foomo/contentful/actions/workflows/pr.yml/badge.svg?branch=main&event=push)](https://github.com/foomo/contentful/actions/workflows/pr.yml)
+[![Build Status](https://github.com/foomo/contentful/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/foomo/contentful/actions/workflows/pr.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/foomo/contentful)](https://goreportcard.com/report/github.com/foomo/contentful)
 [![Coverage Status](https://coveralls.io/repos/github/foomo/contentful/badge.svg?branch=main&)](https://coveralls.io/github/foomo/contentful?branch=main)
 [![GoDoc](https://godoc.org/github.com/foomo/contentful?status.svg)](https://godoc.org/github.com/foomo/contentful)
+
+<p align="center">
+  <img alt="sesamy" src=".github/assets/gocontentful.png"/>
+</p>
+
+# contentful-go
 
 GoLang SDK for [Contentful's](https://www.contentful.com) Content Delivery, Preview and Management API's.
 
@@ -147,12 +152,14 @@ $> go test -v -race
 
 ## Support
 
-This is a project created for demo purposes and not officially supported, so if you find issues or have questions you can let us know via the [issue](https://github.com/contentful-labs/contentful-go/issues/new) page but don't expect a quick and prompt response.
+This is a project created for demo purposes and not officially supported, so if you find issues or have questions, you can let us know via the [issue](https://github.com/foomo/contentful/issues/new) page.
 
-## Contributing
+## How to Contribute
 
-[WIP]
+Please refer to the [CONTRIBUTING](.github/CONTRIBUTING.md) details and follow the [CODE_OF_CONDUCT](.github/CODE_OF_CONDUCT.md) and [SECURITY](.github/SECURITY.md) guidelines.
 
 ## License
 
-MIT
+Distributed under MIT License, please see license file within the code for more details.
+
+_Made with ♥ [foomo](https://www.foomo.org) by [bestbytes](https://www.bestbytes.com)_

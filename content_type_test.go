@@ -18,7 +18,7 @@ func ExampleContentTypesService_Get() {
 
 	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	fmt.Println(contentType.Name)
@@ -29,15 +29,10 @@ func ExampleContentTypesService_List() {
 
 	collection, err := cma.ContentTypes.List(context.TODO(), "space-id").Next()
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
-	contentTypes, err := collection.ToContentType()
-	if err != nil {
-		log.Fatal(err) //nolint:revive
-	}
-
-	for _, contentType := range contentTypes {
+	for _, contentType := range collection.Items {
 		fmt.Println(contentType.Sys.ID, contentType.Sys.PublishedAt)
 	}
 }
@@ -69,7 +64,7 @@ func ExampleContentTypesService_Upsert_create() {
 
 	err := cma.ContentTypes.Upsert(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -78,14 +73,14 @@ func ExampleContentTypesService_Upsert_update() {
 
 	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	contentType.Name = "modified content type name"
 
 	err = cma.ContentTypes.Upsert(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -94,12 +89,12 @@ func ExampleContentTypesService_Activate() {
 
 	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	err = cma.ContentTypes.Activate(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -108,12 +103,12 @@ func ExampleContentTypesService_Deactivate() {
 
 	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	err = cma.ContentTypes.Deactivate(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -122,12 +117,12 @@ func ExampleContentTypesService_Delete() {
 
 	contentType, err := cma.ContentTypes.Get(context.TODO(), "space-id", "content-type-id")
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
 	err = cma.ContentTypes.Delete(context.TODO(), "space-id", contentType)
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 }
 
@@ -136,19 +131,14 @@ func ExampleContentTypesService_Delete_allDrafts() {
 
 	collection, err := cma.ContentTypes.List(context.TODO(), "space-id").Next()
 	if err != nil {
-		log.Fatal(err) //nolint:revive
+		log.Fatal(err)
 	}
 
-	contentTypes, err := collection.ToContentType()
-	if err != nil {
-		log.Fatal(err) //nolint:revive
-	}
-
-	for _, contentType := range contentTypes {
+	for _, contentType := range collection.Items {
 		if contentType.Sys.PublishedAt == "" {
-			err := cma.ContentTypes.Delete(context.TODO(), "space-id", contentType)
+			err := cma.ContentTypes.Delete(context.TODO(), "space-id", &contentType)
 			if err != nil {
-				log.Fatal(err) //nolint:revive
+				log.Fatal(err)
 			}
 		}
 	}
@@ -247,7 +237,7 @@ func TestContentTypeSaveForCreate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "ct-name", payload["name"])
 		assert.Equal(t, "ct-description", payload["description"])
 
@@ -318,7 +308,7 @@ func TestContentTypeSaveForUpdate(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "ct-name-updated", payload["name"])
 		assert.Equal(t, "ct-description-updated", payload["description"])
 
@@ -490,7 +480,7 @@ func TestContentTypeFieldRef(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
 		assert.Len(t, fields, 1)
@@ -552,7 +542,7 @@ func TestContentTypeFieldArray(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
 		assert.Len(t, fields, 1)
@@ -614,7 +604,7 @@ func TestContentTypeFieldValidationRangeUniquePredefinedValues(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
 		assert.Len(t, fields, 1)
@@ -633,17 +623,17 @@ func TestContentTypeFieldValidationRangeUniquePredefinedValues(t *testing.T) {
 		rangeValues := validationRange["range"].(map[string]interface{})
 		errorMessage := validationRange["message"].(string)
 		assert.Equal(t, "error message", errorMessage)
-		assert.Equal(t, float64(20), rangeValues["min"].(float64))
-		assert.Equal(t, float64(30), rangeValues["max"].(float64))
+		assert.InDelta(t, float64(20), rangeValues["min"].(float64), 0)
+		assert.InDelta(t, float64(30), rangeValues["max"].(float64), 0)
 
 		// predefined validation
 		validationPredefinedValues := validations[2].(map[string]interface{})
 		predefinedValues := validationPredefinedValues["in"].([]interface{})
 		assert.Len(t, predefinedValues, 3)
 		assert.Equal(t, "error message 2", validationPredefinedValues["message"].(string))
-		assert.Equal(t, float64(20), predefinedValues[0].(float64))
-		assert.Equal(t, float64(21), predefinedValues[1].(float64))
-		assert.Equal(t, float64(22), predefinedValues[2].(float64))
+		assert.InDelta(t, float64(20), predefinedValues[0].(float64), 0)
+		assert.InDelta(t, float64(21), predefinedValues[1].(float64), 0)
+		assert.InDelta(t, float64(22), predefinedValues[2].(float64), 0)
 
 		w.WriteHeader(http.StatusCreated)
 		_, _ = fmt.Fprintln(w, readTestData(t, "content_type.json"))
@@ -700,7 +690,7 @@ func TestContentTypeFieldTypeMedia(t *testing.T) {
 
 		var payload map[string]interface{}
 		err := json.NewDecoder(r.Body).Decode(&payload)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		fields := payload["fields"].([]interface{})
 		assert.Len(t, fields, 1)

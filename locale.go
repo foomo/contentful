@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -49,16 +48,16 @@ func (locale *Locale) GetVersion() int {
 }
 
 // List returns a locales collection
-func (service *LocalesService) List(ctx context.Context, spaceID string) *Collection {
+func (service *LocalesService) List(ctx context.Context, spaceID string) *Collection[Locale] {
 	path := fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[Locale]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[Locale](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -75,12 +74,12 @@ func (service *LocalesService) Get(ctx context.Context, spaceID, localeID string
 		return nil, err
 	}
 
-	var locale Locale
+	var locale *Locale
 	if err := service.c.do(req, &locale); err != nil {
 		return nil, err
 	}
 
-	return &locale, nil
+	return locale, nil
 }
 
 // Delete the locale
@@ -101,7 +100,7 @@ func (service *LocalesService) Delete(ctx context.Context, spaceID string, local
 
 // Upsert updates or creates a new locale entity
 func (service *LocalesService) Upsert(ctx context.Context, spaceID string, locale *Locale) error {
-	bytesArray, err := json.Marshal(locale)
+	bytesArray, err := Marshal(locale)
 	if err != nil {
 		return err
 	}
@@ -111,10 +110,10 @@ func (service *LocalesService) Upsert(ctx context.Context, spaceID string, local
 
 	if locale.Sys != nil && locale.Sys.CreatedAt != "" {
 		path = fmt.Sprintf("/spaces/%s%s/locales/%s", spaceID, getEnvPath(service.c), locale.Sys.ID)
-		method = "PUT"
+		method = http.MethodPut
 	} else {
 		path = fmt.Sprintf("/spaces/%s%s/locales", spaceID, getEnvPath(service.c))
-		method = "POST"
+		method = http.MethodPost
 	}
 
 	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
@@ -124,5 +123,5 @@ func (service *LocalesService) Upsert(ctx context.Context, spaceID string, local
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(locale.GetVersion()))
 
-	return service.c.do(req, locale)
+	return service.c.do(req, &locale)
 }

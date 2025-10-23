@@ -3,7 +3,6 @@ package contentful
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -73,16 +72,16 @@ func (asset *Asset) GetVersion() int {
 }
 
 // List returns asset collection
-func (service *AssetsService) List(ctx context.Context, spaceID string) *Collection {
+func (service *AssetsService) List(ctx context.Context, spaceID string) *Collection[Asset] {
 	path := fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
 	method := http.MethodGet
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Collection{}
+		return &Collection[Asset]{}
 	}
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[Asset](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -152,7 +151,7 @@ func (asset *Asset) GetLocalized() *AssetNoLocale {
 
 // Upsert updates or creates a new asset entity
 func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset *Asset) error {
-	bytesArray, err := json.Marshal(asset)
+	bytesArray, err := Marshal(asset)
 	if err != nil {
 		return err
 	}
@@ -162,10 +161,10 @@ func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset 
 
 	if asset.Sys.ID != "" {
 		path = fmt.Sprintf("/spaces/%s%s/assets/%s", spaceID, getEnvPath(service.c), asset.Sys.ID)
-		method = "PUT"
+		method = http.MethodPut
 	} else {
 		path = fmt.Sprintf("/spaces/%s%s/assets", spaceID, getEnvPath(service.c))
-		method = "POST"
+		method = http.MethodPost
 	}
 
 	req, err := service.c.newRequest(ctx, method, path, nil, bytes.NewReader(bytesArray), nil)
@@ -175,7 +174,7 @@ func (service *AssetsService) Upsert(ctx context.Context, spaceID string, asset 
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(asset.GetVersion()))
 
-	return service.c.do(req, asset)
+	return service.c.do(req, &asset)
 }
 
 // Delete sends delete request
@@ -230,7 +229,7 @@ func (service *AssetsService) Publish(ctx context.Context, spaceID string, asset
 	version := strconv.Itoa(asset.Sys.Version)
 	req.Header.Set("X-Contentful-Version", version)
 
-	return service.c.do(req, asset)
+	return service.c.do(req, &asset)
 }
 
 // Unpublish unpublishes the asset
@@ -246,5 +245,5 @@ func (service *AssetsService) Unpublish(ctx context.Context, spaceID string, ass
 	version := strconv.Itoa(asset.Sys.Version)
 	req.Header.Set("X-Contentful-Version", version)
 
-	return service.c.do(req, asset)
+	return service.c.do(req, &asset)
 }

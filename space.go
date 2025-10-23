@@ -41,10 +41,10 @@ func (space *Space) GetVersion() int {
 }
 
 // List creates a spaces collection
-func (service *SpacesService) List(ctx context.Context) *Collection {
+func (service *SpacesService) List(ctx context.Context) *Collection[Space] {
 	req, _ := service.c.newRequest(ctx, http.MethodGet, "/spaces", nil, nil, nil)
 
-	col := NewCollection(&CollectionOptions{})
+	col := NewCollection[Space](&CollectionOptions{})
 	col.c = service.c
 	col.req = req
 
@@ -58,20 +58,20 @@ func (service *SpacesService) Get(ctx context.Context, spaceID string) (*Space, 
 
 	req, err := service.c.newRequest(ctx, method, path, nil, nil, nil)
 	if err != nil {
-		return &Space{}, err
+		return nil, err
 	}
 
-	var space Space
-	if ok := service.c.do(req, &space); ok != nil {
-		return &Space{}, ok
+	var space *Space
+	if err := service.c.do(req, &space); err != nil {
+		return nil, err
 	}
 
-	return &space, nil
+	return space, nil
 }
 
 // Upsert updates or creates a new space
 func (service *SpacesService) Upsert(ctx context.Context, space *Space) error {
-	bytesArray, err := json.Marshal(space)
+	bytesArray, err := Marshal(space)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func (service *SpacesService) Upsert(ctx context.Context, space *Space) error {
 
 	req.Header.Set("X-Contentful-Version", strconv.Itoa(space.GetVersion()))
 
-	return service.c.do(req, space)
+	return service.c.do(req, &space)
 }
 
 // Delete the given space
