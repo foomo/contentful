@@ -1,10 +1,10 @@
-[![Build Status](https://github.com/foomo/contentful/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/foomo/contentful/actions/workflows/pr.yml)
+[![GitHub Release](https://img.shields.io/github/release/foomo/contentful.svg?style=flat-square)](https://github.com/foomo/contentful/releases)
+[![GitHub stars](https://img.shields.io/github/stars/foomo/contentful.svg?style=flat-square)](https://github.com/foomo/contentful)
 [![Go Report Card](https://goreportcard.com/badge/github.com/foomo/contentful)](https://goreportcard.com/report/github.com/foomo/contentful)
-[![Coverage Status](https://coveralls.io/repos/github/foomo/contentful/badge.svg?branch=main&)](https://coveralls.io/github/foomo/contentful?branch=main)
 [![GoDoc](https://godoc.org/github.com/foomo/contentful?status.svg)](https://godoc.org/github.com/foomo/contentful)
 
 <p align="center">
-  <img alt="sesamy" src=".github/assets/gocontentful.png"/>
+  <img alt="foomo/contentful" src="docs/public/logo.png" width="400" height="400"/>
 </p>
 
 # contentful-go
@@ -156,10 +156,12 @@ This is a project created for demo purposes and not officially supported, so if 
 
 ## How to Contribute
 
-Please refer to the [CONTRIBUTING](.github/CONTRIBUTING.md) details and follow the [CODE_OF_CONDUCT](.github/CODE_OF_CONDUCT.md) and [SECURITY](.github/SECURITY.md) guidelines.
+Contributions are welcome! Please read the [contributing guide](docs/CONTRIBUTING.md).
+
+![Contributors](https://contributors-table.vercel.app/image?repo=foomo/squadron&width=50&columns=15)
 
 ## License
 
-Distributed under MIT License, please see license file within the code for more details.
+Distributed under MIT License, please see the [license](LICENSE) file for more details.
 
 _Made with ♥ [foomo](https://www.foomo.org) by [bestbytes](https://www.bestbytes.com)_

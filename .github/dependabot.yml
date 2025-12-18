@@ -28,10 +28,6 @@ updates:
         applies-to: security-updates
         update-types: [ minor, patch ]
         patterns: [ '*' ]
-      updates:
-        applies-to: version-updates
-        update-types: [ minor, patch ]
-        patterns: [ '*' ]
     ignore:
       - dependency-name: '*'
         update-types: [ 'version-update:semver-major' ]

@@ -73,29 +73,21 @@ func (col *Collection[T]) Next() (*Collection[T], error) {
 	// override request query
 	col.req.URL.RawQuery = col.String()
 
-	// create copy
-	ret := Collection[T]{
-		Query: col.Query,
-		c:     col.c,
-		req:   col.req,
-		page:  col.page,
-	}
-
 	// makes api call
-	err := col.c.do(col.req, &ret)
+	err := col.c.do(col.req, &col)
 	if err != nil {
 		return nil, err
 	}
 
-	ret.page++
-	if ret.NextPageURL != "" {
-		syncToken := syncTokenRegex.FindStringSubmatch(ret.NextPageURL)
-		ret.SyncToken = syncToken[1]
-	} else if ret.NextSyncURL != "" {
-		syncToken := syncTokenRegex.FindStringSubmatch(ret.NextSyncURL)
-		ret.SyncToken = syncToken[1]
+	col.page++
+	if col.NextPageURL != "" {
+		syncToken := syncTokenRegex.FindStringSubmatch(col.NextPageURL)
+		col.SyncToken = syncToken[1]
+	} else if col.NextSyncURL != "" {
+		syncToken := syncTokenRegex.FindStringSubmatch(col.NextSyncURL)
+		col.SyncToken = syncToken[1]
 	}
-	return &ret, nil
+	return col, nil
 }
 
 // Get makes the col.req with no automatic pagination
