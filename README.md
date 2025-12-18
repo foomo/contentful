@@ -158,7 +158,7 @@ This is a project created for demo purposes and not officially supported, so if 
 
 Contributions are welcome! Please read the [contributing guide](docs/CONTRIBUTING.md).
 
-![Contributors](https://contributors-table.vercel.app/image?repo=foomo/squadron&width=50&columns=15)
+![Contributors](https://contributors-table.vercel.app/image?repo=foomo/contentful&width=50&columns=15)
 
 ## License
 
