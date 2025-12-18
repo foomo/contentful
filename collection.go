@@ -72,6 +72,11 @@ func (col *Collection[T]) Next() (*Collection[T], error) {
 
 	// override request query
 	col.req.URL.RawQuery = col.String()
+	col.Sys = nil
+	col.Items = nil
+	col.Includes = nil
+	col.Errors = nil
+	col.Details = nil
 
 	// makes api call
 	err := col.c.do(col.req, &col)
