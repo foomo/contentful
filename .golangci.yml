@@ -19,6 +19,7 @@ linters:
     - forcetypeassert
     - forbidigo
     - godoclint
+    - modernize
     - wsl_v5
     # Discouraged linters
     - noinlineerr # Disallows inline error handling (`if err := ...; err != nil {`).
