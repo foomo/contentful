@@ -166,6 +166,35 @@ func TestContentfulSetOrganization(t *testing.T) {
 	assert.Equal(t, organizationID, cma.Headers["X-Contentful-Organization"])
 }
 
+func TestSetRegion(t *testing.T) {
+	t.Run("US is a no-op on CMA", func(t *testing.T) {
+		c := NewCMA(CMAToken)
+		c.SetRegion(RegionUS)
+		assert.Equal(t, "https://api.contentful.com", c.BaseURL)
+		assert.Equal(t, "https://upload.contentful.com", c.UploadURL)
+	})
+	t.Run("EU sets CMA BaseURL and UploadURL", func(t *testing.T) {
+		c := NewCMA(CMAToken)
+		c.SetRegion(RegionEU)
+		assert.Equal(t, "https://api.eu.contentful.com", c.BaseURL)
+		assert.Equal(t, "https://upload.eu.contentful.com", c.UploadURL)
+	})
+	t.Run("EU sets CDA BaseURL", func(t *testing.T) {
+		c := NewCDA(CDAToken)
+		c.SetRegion(RegionEU)
+		assert.Equal(t, "https://cdn.eu.contentful.com", c.BaseURL)
+	})
+	t.Run("EU sets CPA BaseURL", func(t *testing.T) {
+		c := NewCPA(CPAToken)
+		c.SetRegion(RegionEU)
+		assert.Equal(t, "https://preview.eu.contentful.com", c.BaseURL)
+	})
+	t.Run("SetRegion is chainable", func(t *testing.T) {
+		c := NewCMA(CMAToken).SetRegion(RegionEU)
+		assert.Equal(t, "https://api.eu.contentful.com", c.BaseURL)
+	})
+}
+
 func TestContentfulSetClient(t *testing.T) {
 	newClient := &http.Client{}
 	cma := NewCMA(CMAToken)
