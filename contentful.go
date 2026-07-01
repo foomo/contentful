@@ -40,14 +40,6 @@ type Contentful struct {
 	Webhooks     *WebhooksService
 }
 
-// Region identifies a Contentful infrastructure region.
-type Region string
-
-const (
-	RegionUS Region = "us"
-	RegionEU Region = "eu"
-)
-
 type service struct {
 	c *Contentful
 }
