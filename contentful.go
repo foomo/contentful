@@ -48,20 +48,6 @@ const (
 	RegionEU Region = "eu"
 )
 
-// SetRegion configures all API base URLs for the given region.
-// RegionUS and the empty string are no-ops; the client keeps its constructor defaults.
-func (c *Contentful) SetRegion(region Region) *Contentful {
-	if region == "" || region == RegionUS {
-		return c
-	}
-	subdomain := "." + string(region)
-	c.BaseURL = strings.Replace(c.BaseURL, ".contentful.com", subdomain+".contentful.com", 1)
-	if c.UploadURL != "" {
-		c.UploadURL = strings.Replace(c.UploadURL, ".contentful.com", subdomain+".contentful.com", 1)
-	}
-	return c
-}
-
 type service struct {
 	c *Contentful
 }
@@ -151,6 +137,20 @@ func NewCPA(token string) *Contentful {
 	c.Locales = &LocalesService{c: c}
 	c.Webhooks = &WebhooksService{c: c}
 
+	return c
+}
+
+// SetRegion configures all API base URLs for the given region.
+// RegionUS and the empty string are no-ops; the client keeps its constructor defaults.
+func (c *Contentful) SetRegion(region Region) *Contentful {
+	if region == "" || region == RegionUS {
+		return c
+	}
+	subdomain := "." + string(region)
+	c.BaseURL = strings.Replace(c.BaseURL, ".contentful.com", subdomain+".contentful.com", 1)
+	if c.UploadURL != "" {
+		c.UploadURL = strings.Replace(c.UploadURL, ".contentful.com", subdomain+".contentful.com", 1)
+	}
 	return c
 }
 
