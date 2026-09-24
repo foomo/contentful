@@ -262,7 +262,13 @@ func (c *Contentful) do(req *http.Request, v any) error {
 	}
 
 	time.Sleep(time.Second * time.Duration(waitSeconds))
-
+	if req.GetBody != nil {
+		body, err := req.GetBody()
+		if err != nil {
+			return apiError
+		}
+		req.Body = body
+	}
 	return c.do(req, v)
 }
 
