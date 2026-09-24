@@ -228,14 +228,12 @@ func (c *Contentful) do(req *http.Request, v any) error {
 	}
 
 	if res.StatusCode >= 200 && res.StatusCode < 400 {
+		defer res.Body.Close()
 		if v != nil {
-			defer res.Body.Close()
-			err = json.NewDecoder(res.Body).Decode(v)
-			if err != nil {
+			if err := json.NewDecoder(res.Body).Decode(v); err != nil {
 				return err
 			}
 		}
-
 		return nil
 	}
 
